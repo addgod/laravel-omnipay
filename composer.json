@@ -1,0 +1,16 @@
+{
+    "name": "addgod/laravel-omnipay-dibs-d2",
+    "description": "A larvel integration for Omnipay, and DIBS D2",
+    "type": "laravel, omnipay, paymentgateway, dibs, dibs d2",
+    "require": {
+        "laravel/laravel": "^5.5",
+        "omnipay/omnipay": "^2.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jesper Kold-Hansen",
+            "email": "jkoldhansen@gmail.com"
+        }
+    ]
+}
