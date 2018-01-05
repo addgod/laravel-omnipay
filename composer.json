@@ -4,7 +4,34 @@
     "type": "laravel, omnipay, paymentgateway, dibs, dibs d2",
     "require": {
         "laravel/laravel": "^5.5",
-        "omnipay/omnipay": "^2.3"
+        "barryvdh/laravel-omnipay": "0.2.*@dev",
+        "addgod/omnipay-dibs-d2": "dev-master"
+    },
+    "repositories": [
+        {
+            "type" : "git",
+            "url" : "https://github.com/Addgod/omnipay-dibs-d2.git"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Addgod\\DibsD2\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Addgod\\DibsD2\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Addgod\\DibsD2\\ServiceProvider"
+            ],
+            "aliases": {
+                "DibsD2": "Addgod\\DibsD2\\Facade"
+            }
+        }
     },
     "license": "MIT",
     "authors": [
@@ -12,5 +39,8 @@
             "name": "Jesper Kold-Hansen",
             "email": "jkoldhansen@gmail.com"
         }
-    ]
+    ],
+    "require-dev": {
+        "orchestra/testbench": "~3.0"
+    }
 }
