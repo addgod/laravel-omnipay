@@ -5,7 +5,7 @@ Route::group([
     'middleware'    => 'web',
     'prefix'        => config('dibsd2.route_prefix'),
 ], function() {
-    Route::post('/purchase', 'DibsD2Controller@purchace')->name('dibsd2.purchase');
+    Route::post('/purchase', 'DibsD2Controller@purchase')->name('dibsd2.purchase');
     Route::post('/complete/purchase', 'DibsD2Controller@completePurchase')->name('dibsd2.complete.purchase');
     Route::post('/authorize', 'DibsD2Controller@authorize')->name('dibsd2.authorize');
     Route::post('/re-authorize', 'DibsD2Controller@reAuthorize')->name('dibsd2.re-authorize');

@@ -52,7 +52,7 @@ class GatewayTest extends TestCase
 
     public function testController()
     {
-        $response = $this->post('dibsd2/', [
+        $response = $this->post('dibsd2/purchase', [
             'returnUrl'     => url('/dibsd2/complete/purchase'),
             'amount'        => 100.00,
             'callbackUrl'   => url('/dibsd2/callback'),

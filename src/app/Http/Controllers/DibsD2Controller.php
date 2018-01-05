@@ -7,10 +7,21 @@ use Illuminate\Http\Request;
 class DibsD2Controller extends Controller
 {
 
-    public function purchase(Request $request, $account = 'default')
+    public function purchase(Request $request)
     {
-        DibsD2::setDefaultAccount($account);
-        $response = DibsD2::purchase($request->toArray())->send();
+        $params = [
+            'returnUrl'     => url(config('dibsd2.route_prefix') . '/complete/purchase'),
+            'amount'        => $request->amount,
+            'callbackUrl'   => url(config('dibsd2.route_prefix') . '/callback'),
+            'currency'      => $request->currency,
+            'orderid'       => $request->orderid,
+            'cancelurl'     => $request->cancelurl
+        ];
+
+        $omnipay = app()->make('DibsD2');
+        $omnipay::setDefaultAccount($request->account);
+
+        $response = $omnipay::purchase($params)->send();
 
         if ($response->isSuccessful()) {
 

@@ -3,16 +3,9 @@
     "description": "A larvel integration for Omnipay, and DIBS D2",
     "type": "laravel, omnipay, paymentgateway, dibs, dibs d2",
     "require": {
-        "laravel/laravel": "^5.5",
-        "barryvdh/laravel-omnipay": "0.2.*@dev",
+        "laravel/framework": "5.5.*",
         "addgod/omnipay-dibs-d2": "dev-master"
     },
-    "repositories": [
-        {
-            "type" : "git",
-            "url" : "https://github.com/Addgod/omnipay-dibs-d2.git"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Addgod\\DibsD2\\": "src/"
