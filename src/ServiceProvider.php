@@ -24,6 +24,8 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
         $this->loadRoutesFrom(__DIR__. '/../routes/dibsd2.php');
 
+        $this->loadMigrationsFrom(__DIR__.'/../migrations');
+
         $this->app->singleton('dibsd2',function ($app){
             $defaults = $app['config']->get('dibsd2.defaults', array());
             return new GatewayManager($app, new GatewayFactory, $defaults);
