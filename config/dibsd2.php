@@ -11,12 +11,14 @@ return [
 
     'accounts' => [
         'default' => [
-            'key1'          => 'B9%q0~U3fP8O*Qn%$]sioC?U^nY15CCR',
-            'key2'          => 'MG7H0_*O)-+xxC*IT_F-o6wjrUW%kZu9',
-            'merchantId'    => 90234845,
-            'username'      => 'webserver',
-            'password'      => 'Comwell2017',
-            'lang'          => 'dk',
+            'key1'          => '', // MD5 Key 1
+            'key2'          => '', // MD5 Key 2
+            'merchantId'    => 0, // Merchant ID
+            'username'      => '', // Username for a webuser
+            'password'      => '', // Password for a webuser
+            'lang'          => 'dk', // Language shown in the dibs window
+            'currency'      => 'DKK', // Currency used for this account
+            'payType'       => 'DK,V-DK,MC,VISA', // Possible values here https://tech.dibspayment.com/D2/Toolbox/Paytypes
         ],
     ],
 ];
