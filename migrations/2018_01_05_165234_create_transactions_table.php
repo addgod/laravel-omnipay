@@ -15,7 +15,7 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('account');
+            $table->string('merchant_id');
             $table->string('amount');
             $table->string('redirect_to');
             $table->string('transaction', 100)->nullable();
@@ -31,6 +31,26 @@ class CreateTransactionsTable extends Migration
             $table->text('payload')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('merchants', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('merchant_id')->unique();
+            $table->string('name');
+            $table->string('key1');
+            $table->string('key2');
+            $table->string('username')->nullable();
+            $table->string('password')->nullable();
+            $table->string('lang');
+            $table->string('currency');
+            $table->string('pay_type');
+            $table->timestamps();
+        });
+
+        Schema::create('merchantables', function(Blueprint $table) {
+            $table->unsignedInteger('merchant_id');
+            $table->foreign('merchant_id')->references('id')->on('merchants')->onDelete('cascade');
+            $table->morphs('merchantable');
+        });
     }
 
     /**
@@ -43,6 +63,8 @@ class CreateTransactionsTable extends Migration
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('transaction_logs');
         Schema::dropIfExists('transactions');
+        Schema::dropIfExists('merchants');
+        Schema::dropIfExists('merchantables');
         Schema::enableForeignKeyConstraints();
     }
 }

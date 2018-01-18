@@ -46,7 +46,7 @@ class GatewayTest extends TestCase
 
     public function testGateway()
     {
-        DibsD2::setDefaultAccount('default');
+        DibsD2::setDefaultMerchant('default');
     }
 
 

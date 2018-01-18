@@ -3,6 +3,7 @@
 namespace Addgod\DibsD2;
 
 use Omnipay\Common\GatewayFactory;
+use Addgod\DibsD2\app\Models\Merchant;
 
 class GatewayManager {
 
@@ -14,9 +15,9 @@ class GatewayManager {
     protected $app;
 
     /**
-     * The registered accounts
+     * The registered merchants
      */
-    protected $accounts;
+    protected $merchants;
 
     /**
      * The default settings, applied to every gateway
@@ -45,46 +46,53 @@ class GatewayManager {
      */
     public function gateway()
     {
-        $account = $this->getDefaultAccount();
-        if(!isset($this->accounts[$account])){
+        $merchant = $this->getDefaultMerchant();
+        if(!isset($this->merchants[$merchant])){
             $gateway = $this->factory->create('DibsD2', null, $this->app['request']);
-            $gateway->initialize($this->getConfig($account));
-            $this->accounts[$account] = $gateway;
+            $gateway->initialize($this->getConfig($merchant));
+            $this->merchants[$merchant] = $gateway;
         }
 
-        return $this->accounts[$account];
+        return $this->merchants[$merchant];
     }
 
     /**
      * Get the configuration, based on the config and the defaults.
      */
-    protected function getConfig($name)
+    protected function getConfig($id)
     {
-        return array_merge(
-            $this->defaults,
-            $this->app['config']->get('dibsd2.accounts.'.$name, array())
-        );
+        if ($this->app['config']['dibsd2.driver'] === 'array') {
+            return array_merge(
+                $this->defaults,
+                $this->app['config']->get('dibsd2.merchants.'.$id, array())
+            );
+        } elseif ($this->app['config']['dibsd2.driver'] === 'database') {
+            return array_merge(
+                $this->defaults,
+                Merchant::find($id)->toConfig()
+            );
+        }
     }
 
     /**
-     * Get the default account name.
+     * Get the default merchant name.
      *
      * @return string
      */
-    public function getDefaultAccount()
+    public function getDefaultMerchant()
     {
-        return $this->app['config']['dibsd2.account'];
+        return $this->app['config']['dibsd2.default_merchant'];
     }
 
     /**
-     * Set the default account name.
+     * Set the default merchant name.
      *
      * @param  string  $name
      * @return void
      */
-    public function setDefaultAccount($name)
+    public function setDefaultMerchant($name)
     {
-        $this->app['config']['dibsd2.account'] = $name;
+        $this->app['config']['dibsd2.default_merchant'] = $name;
     }
 
     /**

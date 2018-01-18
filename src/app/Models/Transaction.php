@@ -23,17 +23,21 @@ class Transaction extends Model
      */
     protected $fillable = [
         'transaction',
-        'account',
+        'merchant_id',
         'status',
         'redirect_to',
-    ];
-
-    protected $attributes = [
-        'account' => 'default'
     ];
 
     public function logs()
     {
         return $this->hasMany(TransactionLog::class);
+    }
+
+    public function save(array $options = [])
+    {
+        if (empty($this->attributes['merchant_id'])) {
+            $this->attributes['merchant_id'] = config('dibsd2.default_merchant');
+        }
+        return parent::save($options);
     }
 }

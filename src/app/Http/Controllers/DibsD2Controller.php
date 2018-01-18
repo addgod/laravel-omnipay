@@ -17,7 +17,7 @@ class DibsD2Controller extends Controller
         ];
 
         $dibs = app()->make('DibsD2');
-        $dibs::setDefaultAccount($transaction->account);
+        $dibs::setDefaultMerchant($transaction->merchant_id);
 
         $response = $dibs::purchase($params)->send();
 
@@ -61,7 +61,7 @@ class DibsD2Controller extends Controller
         ];
 
         $dibs = app()->make('DibsD2');
-        $dibs::setDefaultAccount($transaction->account);
+        $dibs::setDefaultMerchant($transaction->merchant_id);
 
         $response = $dibs::authorize($params)->send();
 
@@ -100,7 +100,7 @@ class DibsD2Controller extends Controller
             'transactionId' => $transaction->transaction
         ];
         $dibs = app()->make('DibsD2');
-        $dibs::setDefaultAccount($transaction->account);
+        $dibs::setDefaultMerchant($transaction->merchant_id);
 
         $response = $dibs::reAuthorize($params)->send();
 
@@ -124,7 +124,7 @@ class DibsD2Controller extends Controller
         ];
 
         $dibs = app()->make('DibsD2');
-        $dibs::setDefaultAccount($transaction->account);
+        $dibs::setDefaultMerchant($transaction->merchant_id);
 
         $response = $dibs::capture($params)->send();
 
@@ -141,6 +141,8 @@ class DibsD2Controller extends Controller
         } else {
             throw new \Exception('Capture of payment failed');
         }
+
+        return redirect()->back();
     }
 
     public function void(Transaction $transaction)
@@ -151,7 +153,7 @@ class DibsD2Controller extends Controller
         ];
 
         $dibs = app()->make('DibsD2');
-        $dibs::setDefaultAccount($transaction->account);
+        $dibs::setDefaultMerchant($transaction->merchant_id);
 
         $response = $dibs::void($params)->send();
 
@@ -166,8 +168,17 @@ class DibsD2Controller extends Controller
                 ]
             ]);
         } else {
+            $transaction->logs()->create([
+                'payload' => [
+                    'user'      => \Auth::user()->toArray(),
+                    'action'    => 'Void',
+                    'data'      => $response->getData()
+                ]
+            ]);
             throw new \Exception('Void of payment failed');
         }
+
+        return redirect()->back();
     }
 
     public function refund(Transaction $transaction, $amount = null)
@@ -179,7 +190,7 @@ class DibsD2Controller extends Controller
         ];
 
         $dibs = app()->make('DibsD2');
-        $dibs::setDefaultAccount($transaction->account);
+        $dibs::setDefaultMerchant($transaction->merchant_id);
 
         $response = $dibs::refund($params)->send();
 
@@ -202,6 +213,8 @@ class DibsD2Controller extends Controller
         } else {
             throw new \Exception('Refund of payment failed');
         }
+
+        return redirect()->back();
     }
 
     public function callback()

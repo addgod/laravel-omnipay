@@ -15,7 +15,7 @@ Route::group([
 
 Route::group([
     'namespace'     => 'Addgod\DibsD2\app\Http\Controllers',
-    'middleware'    => 'admin',
+    'middleware'    => ['web', 'admin'],
     'prefix'        => config('dibsd2.admin_route_prefix'),
 ], function() {
     Route::get('/capture/{transaction}', 'DibsD2Controller@capture')->name('dibsd2.capture');
