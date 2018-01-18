@@ -15,7 +15,7 @@
     ],
     "require": {
         "laravel/framework": "5.5.*",
-        "addgod/omnipay-dibs-d2": "dev-master"
+        "addgod/omnipay-dibs-d2": "~1.0"
     },
     "autoload": {
         "psr-4": {
