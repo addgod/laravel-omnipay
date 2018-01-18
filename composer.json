@@ -1,7 +1,7 @@
 {
     "name": "addgod/laravel-omnipay-dibs-d2",
     "description": "A larvel integration for Omnipay, and DIBS D2",
-    "type": "laravel, omnipay, paymentgateway, dibs, dibs d2",
+    "type": "laravel, omnipay, paymentgateway, dibs, dibsd2",
     "require": {
         "laravel/framework": "5.5.*",
         "addgod/omnipay-dibs-d2": "dev-master"
