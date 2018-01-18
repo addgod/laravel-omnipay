@@ -13,9 +13,10 @@
         "transfer",
         "laravel"
     ],
+    "minimum-stability" : "dev",
     "require": {
         "laravel/framework": "5.5.*",
-        "addgod/omnipay-dibs-d2": "~1.0"
+        "addgod/omnipay-dibs-d2": "dev-master"
     },
     "autoload": {
         "psr-4": {
