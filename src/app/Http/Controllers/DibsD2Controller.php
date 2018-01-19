@@ -224,14 +224,13 @@ class DibsD2Controller extends Controller
 
         $transaction = Transaction::find($response->getOrderId());
         $transaction->transaction = $response->getTransactionReference();
-
         if ($response->isCaptured()) {
             $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
             $transaction->save();
         } elseif ($response->isAuthorized()) {
             $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
-            $transaction->save();
         }
+        $transaction->save();
 
         $transaction->logs()->create([
             'payload' => [
