@@ -120,7 +120,8 @@ class DibsD2Controller extends Controller
     {
         $params = [
             'amount'        => $transaction->amount,
-            'transactionId' => $transaction->transaction
+            'transactionId' => $transaction->transaction,
+            'orderId'       => $transaction->id,
         ];
 
         $dibs = app()->make('DibsD2');
@@ -128,16 +129,17 @@ class DibsD2Controller extends Controller
 
         $response = $dibs::capture($params)->send();
 
+        $transaction->logs()->create([
+            'payload' => [
+                'user'      => \Auth::user()->toArray(),
+                'action'    => 'Capture',
+                'data'      => $response->getData()
+            ]
+        ]);
+
         if ($response->isSuccessful()) {
             $transaction->status = Transaction::STATUS_CAPTURE;
             $transaction->save();
-            $transaction->logs()->create([
-                'payload' => [
-                    'user'      => \Auth::user()->toArray(),
-                    'action'    => 'Capture',
-                    'data'      => $response->getData()
-                ]
-            ]);
         } else {
             throw new \Exception('Capture of payment failed');
         }
@@ -149,7 +151,8 @@ class DibsD2Controller extends Controller
     {
         $params = [
             'orderId'        => $transaction->id,
-            'transactionId'  => $transaction->transaction
+            'transactionId'  => $transaction->transaction,
+            'orderId'       => $transaction->id,
         ];
 
         $dibs = app()->make('DibsD2');
@@ -157,24 +160,18 @@ class DibsD2Controller extends Controller
 
         $response = $dibs::void($params)->send();
 
+        $transaction->logs()->create([
+            'payload' => [
+                'user'      => \Auth::user()->toArray(),
+                'action'    => 'Void',
+                'data'      => $response->getData()
+            ]
+        ]);
+
         if ($response->isSuccessful()) {
             $transaction->status = Transaction::STATUS_VOID;
             $transaction->save();
-            $transaction->logs()->create([
-                'payload' => [
-                    'user'      => \Auth::user()->toArray(),
-                    'action'    => 'Void',
-                    'data'      => $response->getData()
-                ]
-            ]);
         } else {
-            $transaction->logs()->create([
-                'payload' => [
-                    'user'      => \Auth::user()->toArray(),
-                    'action'    => 'Void',
-                    'data'      => $response->getData()
-                ]
-            ]);
             throw new \Exception('Void of payment failed');
         }
 
@@ -194,6 +191,14 @@ class DibsD2Controller extends Controller
 
         $response = $dibs::refund($params)->send();
 
+        $transaction->logs()->create([
+            'payload' => [
+                'user'      => \Auth::user()->toArray(),
+                'action'    => 'Refund',
+                'data'      => $response->getData()
+            ]
+        ]);
+
         if ($response->isSuccessful()) {
             if (!is_null($amount) && $amount < $transaction->amount) {
                 $transaction->status = Transaction::STATUS_REFUND_PARTIALLY;
@@ -203,13 +208,6 @@ class DibsD2Controller extends Controller
                 $transaction->amount = 0;
             }
             $transaction->save();
-            $transaction->logs()->create([
-                'payload' => [
-                    'user'      => \Auth::user()->toArray(),
-                    'action'    => 'Refund',
-                    'data'      => $response->getData()
-                ]
-            ]);
         } else {
             throw new \Exception('Refund of payment failed');
         }

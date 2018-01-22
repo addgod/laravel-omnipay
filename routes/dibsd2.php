@@ -2,7 +2,7 @@
 
 Route::group([
     'namespace'     => 'Addgod\DibsD2\app\Http\Controllers',
-    'middleware'    => 'web',
+    'middleware'    => 'bindings',
     'prefix'        => config('dibsd2.public_route_prefix'),
 ], function() {
     Route::get('/purchase/{transaction}', 'DibsD2Controller@purchase')->name('dibsd2.purchase');

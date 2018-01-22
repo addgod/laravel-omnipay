@@ -69,7 +69,7 @@ class GatewayManager {
         } elseif ($this->app['config']['dibsd2.driver'] === 'database') {
             return array_merge(
                 $this->defaults,
-                Merchant::find($id)->toConfig()
+                Merchant::findOrFail($id)->toConfig()
             );
         }
     }
