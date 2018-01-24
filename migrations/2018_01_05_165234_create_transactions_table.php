@@ -16,7 +16,7 @@ class CreateTransactionsTable extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->increments('id');
             $table->string('merchant_id');
-            $table->string('amount');
+            $table->decimal('amount');
             $table->string('redirect_to');
             $table->string('transaction', 100)->nullable();
             $table->tinyInteger('status')->default(0);
