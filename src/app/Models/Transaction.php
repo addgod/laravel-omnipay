@@ -1,6 +1,6 @@
 <?php
 
-namespace Addgod\DibsD2\app\Models;
+namespace Addgod\Omnipay\app\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -34,11 +34,61 @@ class Transaction extends Model
         return $this->hasMany(TransactionLog::class);
     }
 
+    /**
+     * Get the merchant associated with the transaction.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function merchant()
+    {
+        return $this->belongsTo(Merchant::class);
+    }
+
     public function save(array $options = [])
     {
         if (empty($this->attributes['merchant_id'])) {
-            $this->attributes['merchant_id'] = config('dibsd2.default_merchant');
+            $this->attributes['merchant_id'] = config('omnipay.default_merchant');
         }
         return parent::save($options);
+    }
+
+    public function purchase()
+    {
+        $dibs = app()->make('Omnipay');
+        $dibs::setDefaultMerchant($transaction->merchant_id);
+
+        $response = $dibs::purchase($this->getParameters())->send();
+
+        $transaction->status = Transaction::STATUS_PURCHASE;
+        $transaction->save();
+
+        if ($response->isSuccessful()) {
+            return redirect($transaction->redirect_to);
+        } else if ($response->isRedirect()) {
+            return $response->getRedirectResponse();
+        } else {
+            throw new \Exception('Purchase request failed');
+        }
+    }
+
+    public function completePurchase()
+    {
+
+    }
+
+    public function authorize()
+    {
+
+    }
+
+    private function getParameters()
+    {
+        return [
+            'returnUrl'      => route('dibsd2.complete.authorize', [$this->id]),
+            'callbackUrl'    => route('dibsd2.callback', [$this->id]),
+            'transactionId'  => $this->transaction,
+            'amount'         => $this->amount,
+            'orderId'        => $this->id,
+        ];
     }
 }

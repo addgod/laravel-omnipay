@@ -3,8 +3,8 @@
 namespace Addgod\DibsD2\Tests\Unit;
 
 use Orchestra\Testbench\TestCase;
-use Addgod\DibsD2\GatewayManager;
-use Addgod\DibsD2\ServiceProvider;
+use Addgod\Omnipay\GatewayManager;
+use Addgod\Omnipay\ServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Omnipay\Common\GatewayFactory;
 use Illuminate\Database\Eloquent\Model;

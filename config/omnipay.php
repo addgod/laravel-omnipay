@@ -1,15 +1,33 @@
 <?php
 
 return [
-    'public_route_prefix' => env('DIBSD2_PREFIX', '/dibsd2/'),
-    'admin_route_prefix' => env('DIBSD2_ADMIN_PREFIX', '/admin/dibsd2/'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Route prefix for omnipay routes.
+    |--------------------------------------------------------------------------
+    |
+    | This is the route prefix, for all public omnipay routess
+    |
+     */
+    'public_route_prefix' => env('OMNIPAY_PREFIX', '/omnipay/'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Route prefix for omnipay routes behind login.
+    |--------------------------------------------------------------------------
+    |
+    | This is the route prefix, for all routes, that are behind login.
+    |
+     */
+    'admin_route_prefix' => env('OMNIPAY_ADMIN_PREFIX', '/admin/omnipay/'),
 
     /*
     |--------------------------------------------------------------------------
     | Default Config Driver
     |--------------------------------------------------------------------------
     |
-    | The dibs module, supports two driver modes. Array and database.
+    | The omnipay module, supports two driver modes. Array and database.
     | It is possible to store, merchant config, in either an array, so
     | in this config file, or it is possible to use the supplied model and
     | database driver for storing merchants.

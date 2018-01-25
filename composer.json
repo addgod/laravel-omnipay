@@ -1,10 +1,8 @@
 {
-    "name": "addgod/laravel-omnipay-dibs-d2",
-    "description": "A larvel integration for Omnipay, and DIBS D2",
+    "name": "addgod/laravel-omnipay",
+    "description": "A larvel integration for Omnipay",
     "type": "library",
     "keywords": [
-        "dibs",
-        "dubs d2",
         "gateway",
         "merchant",
         "omnipay",
@@ -21,21 +19,21 @@
     },
     "autoload": {
         "psr-4": {
-            "Addgod\\DibsD2\\": "src/"
+            "Addgod\\Omnipay\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Addgod\\DibsD2\\Tests\\": "tests/"
+            "Addgod\\Omnipay\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Addgod\\DibsD2\\ServiceProvider"
+                "Addgod\\Omnipay\\ServiceProvider"
             ],
             "aliases": {
-                "DibsD2": "Addgod\\DibsD2\\Facade"
+                "Omnipay": "Addgod\\Omnipay\\Facade"
             }
         }
     },

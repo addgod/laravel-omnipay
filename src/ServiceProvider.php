@@ -1,5 +1,5 @@
 <?php
-namespace Addgod\DibsD2;
+namespace Addgod\Omnipay;
 
 use Omnipay\Common\GatewayFactory;
 
@@ -19,15 +19,15 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function register()
     {
-        $configPath = __DIR__ . '/../config/dibsd2.php';
-        $this->publishes([$configPath => config_path('dibsd2.php')]);
+        $configPath = __DIR__ . '/../config/omnipay.php';
+        $this->publishes([$configPath => config_path('omnipay.php')]);
 
-        $this->loadRoutesFrom(__DIR__. '/../routes/dibsd2.php');
+        $this->loadRoutesFrom(__DIR__. '/../routes/omnipay.php');
 
         $this->loadMigrationsFrom(__DIR__.'/../migrations');
 
-        $this->app->singleton('dibsd2',function ($app){
-            $defaults = $app['config']->get('dibsd2.defaults', array());
+        $this->app->singleton('omnipay',function ($app){
+            $defaults = $app['config']->get('omnipay.defaults', array());
             return new GatewayManager($app, new GatewayFactory, $defaults);
         });
     }
@@ -39,6 +39,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function provides()
     {
-        return array('dibsd2');
+        return array('omnipay');
     }
 }

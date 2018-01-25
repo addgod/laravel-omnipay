@@ -20,7 +20,7 @@ class CreateTransactionsTable extends Migration
             $table->string('redirect_to');
             $table->string('transaction', 100)->nullable();
             $table->tinyInteger('status')->default(0);
-            $table->morphs('entity');
+            $table->nullableMorphs('entity');
             $table->timestamps();
         });
 
@@ -34,15 +34,8 @@ class CreateTransactionsTable extends Migration
 
         Schema::create('merchants', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('merchant_id')->unique();
-            $table->string('name');
-            $table->string('key1');
-            $table->string('key2');
-            $table->string('username')->nullable();
-            $table->string('password')->nullable();
-            $table->string('lang');
-            $table->string('currency');
-            $table->string('pay_type');
+            $table->string('gateway');
+            $table->text('config');
             $table->timestamps();
         });
 

@@ -8,9 +8,9 @@ Route::group([
     Route::get('/purchase/{transaction}', 'DibsD2Controller@purchase')->name('dibsd2.purchase');
     Route::get('/authorize/{transaction}', 'DibsD2Controller@authorize')->name('dibsd2.authorize');
     Route::get('/re-authorize/{transaction}', 'DibsD2Controller@reAuthorize')->name('dibsd2.re-authorize');
-    Route::post('/complete/purchase', 'DibsD2Controller@completePurchase')->name('dibsd2.complete.purchase');
-    Route::post('/complete/authorize', 'DibsD2Controller@completeAuthorize')->name('dibsd2.complete.authorize');
-    Route::post('/callback', 'DibsD2Controller@callback')->name('dibsd2.callback');
+    Route::post('/complete/purchase/{transaction}', 'DibsD2Controller@completePurchase')->name('dibsd2.complete.purchase');
+    Route::post('/complete/authorize/{transaction}', 'DibsD2Controller@completeAuthorize')->name('dibsd2.complete.authorize');
+    Route::post('/callback/{transaction}', 'DibsD2Controller@callback')->name('dibsd2.callback');
 });
 
 Route::group([

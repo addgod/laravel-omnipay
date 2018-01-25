@@ -1,5 +1,5 @@
 <?php
-namespace Addgod\DibsD2;
+namespace Addgod\Omnipay;
 
 
 class Facade extends \Illuminate\Support\Facades\Facade
@@ -8,6 +8,6 @@ class Facade extends \Illuminate\Support\Facades\Facade
     /**
      * {@inheritDoc}
      */
-    protected static function getFacadeAccessor() { return 'dibsd2'; }
+    protected static function getFacadeAccessor() { return 'omnipay'; }
 
 }

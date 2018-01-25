@@ -1,5 +1,5 @@
 <?php
-namespace Addgod\DibsD2\app\Http\Controllers;
+namespace Addgod\Omnipay\app\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use App\Models\Transaction;
@@ -10,8 +10,8 @@ class DibsD2Controller extends Controller
     public function purchase(Transaction $transaction)
     {
         $params = [
-            'returnUrl'     => route('dibsd2.complete.purchase'),
-            'callbackUrl'   => route('dibsd2.callback'),
+            'returnUrl'     => route('dibsd2.complete.purchase', [$transaction->id]),
+            'callbackUrl'   => route('dibsd2.callback', [$transaction->id]),
             'amount'        => $transaction->amount,
             'orderid'       => $transaction->id,
         ];
@@ -24,19 +24,21 @@ class DibsD2Controller extends Controller
         $transaction->status = Transaction::STATUS_PURCHASE;
         $transaction->save();
 
-        if ($response->isRedirect()) {
+        if ($response->isSuccessful()) {
+            return redirect($transaction->redirect_to);
+        } else if ($response->isRedirect()) {
             return $response->getRedirectResponse();
         } else {
             throw new \Exception('Payment failed');
         }
     }
 
-    public function completePurchase()
+    public function completePurchase(Transaction $transaction)
     {
         $dibs = app()->make('DibsD2');
+        $dibs::setDefaultMerchant($transaction->merchant_id);
         $response = $dibs::completePurchase()->send();
 
-        $transaction = Transaction::find($response->getOrderId());
         $transaction->transaction = $response->getTransactionReference();
         $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
         $transaction->save();
@@ -54,8 +56,8 @@ class DibsD2Controller extends Controller
     public function authorize(Transaction $transaction)
     {
         $params = [
-            'returnUrl'     => route('dibsd2.complete.authorize'),
-            'callbackUrl'   => route('dibsd2.callback'),
+            'returnUrl'     => route('dibsd2.complete.authorize', [$transaction->id]),
+            'callbackUrl'   => route('dibsd2.callback', [$transaction->id]),
             'amount'        => $transaction->amount,
             'orderid'       => $transaction->id,
         ];
@@ -75,12 +77,12 @@ class DibsD2Controller extends Controller
         }
     }
 
-    public function completeAuthorize()
+    public function completeAuthorize(Transaction $transaction)
     {
         $dibs = app()->make('DibsD2');
+        $dibs::setDefaultMerchant($transaction->merchant_id);
         $response = $dibs::completeAuthorize()->send();
 
-        $transaction = Transaction::find($response->getOrderId());
         $transaction->transaction = $response->getTransactionReference();
         $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
         $transaction->save();
@@ -215,12 +217,12 @@ class DibsD2Controller extends Controller
         return redirect()->back();
     }
 
-    public function callback()
+    public function callback(Transaction $transaction)
     {
         $dibs = app()->make('DibsD2');
+        $dibs::setDefaultMerchant($transaction->merchant_id);
         $response = $dibs::completeAuthorize()->send();
 
-        $transaction = Transaction::find($response->getOrderId());
         $transaction->transaction = $response->getTransactionReference();
         if ($response->isCaptured()) {
             $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;

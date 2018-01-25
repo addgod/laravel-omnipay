@@ -1,6 +1,6 @@
 <?php
 
-namespace Addgod\DibsD2;
+namespace Addgod\Omnipay;
 
 use Omnipay\Common\GatewayFactory;
 use Addgod\DibsD2\app\Models\Merchant;
@@ -61,12 +61,12 @@ class GatewayManager {
      */
     protected function getConfig($id)
     {
-        if ($this->app['config']['dibsd2.driver'] === 'array') {
+        if ($this->app['config']['omnipay.driver'] === 'array') {
             return array_merge(
                 $this->defaults,
-                $this->app['config']->get('dibsd2.merchants.'.$id, array())
+                $this->app['config']->get('omnipay.merchants.'.$id, array())
             );
-        } elseif ($this->app['config']['dibsd2.driver'] === 'database') {
+        } elseif ($this->app['config']['omnipay.driver'] === 'database') {
             return array_merge(
                 $this->defaults,
                 Merchant::findOrFail($id)->toConfig()
@@ -81,7 +81,7 @@ class GatewayManager {
      */
     public function getDefaultMerchant()
     {
-        return $this->app['config']['dibsd2.default_merchant'];
+        return $this->app['config']['omnipay.default_merchant'];
     }
 
     /**
@@ -92,7 +92,7 @@ class GatewayManager {
      */
     public function setDefaultMerchant($name)
     {
-        $this->app['config']['dibsd2.default_merchant'] = $name;
+        $this->app['config']['omnipay.default_merchant'] = $name;
     }
 
     /**
