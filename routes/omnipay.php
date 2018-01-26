@@ -1,24 +1,24 @@
 <?php
 
 Route::group([
-    'namespace'     => 'Addgod\DibsD2\app\Http\Controllers',
+    'namespace'     => 'Addgod\Omnipay\app\Http\Controllers',
     'middleware'    => 'bindings',
-    'prefix'        => config('dibsd2.public_route_prefix'),
+    'prefix'        => config('omnipay.public_route_prefix'),
 ], function() {
-    Route::get('/purchase/{transaction}', 'DibsD2Controller@purchase')->name('dibsd2.purchase');
-    Route::get('/authorize/{transaction}', 'DibsD2Controller@authorize')->name('dibsd2.authorize');
-    Route::get('/re-authorize/{transaction}', 'DibsD2Controller@reAuthorize')->name('dibsd2.re-authorize');
-    Route::post('/complete/purchase/{transaction}', 'DibsD2Controller@completePurchase')->name('dibsd2.complete.purchase');
-    Route::post('/complete/authorize/{transaction}', 'DibsD2Controller@completeAuthorize')->name('dibsd2.complete.authorize');
-    Route::post('/callback/{transaction}', 'DibsD2Controller@callback')->name('dibsd2.callback');
+    Route::get('/purchase/{transaction}', 'OmnipayController@purchase')->name('omnipay.purchase');
+    Route::get('/authorize/{transaction}', 'OmnipayController@authorize')->name('omnipay.authorize');
+    Route::get('/re-authorize/{transaction}', 'OmnipayController@reAuthorize')->name('omnipay.re-authorize');
+    Route::post('/complete/purchase/{transaction}', 'OmnipayController@completePurchase')->name('omnipay.complete.purchase');
+    Route::post('/complete/authorize/{transaction}', 'OmnipayController@completeAuthorize')->name('omnipay.complete.authorize');
+    Route::post('/notify/{transaction}', 'OmnipayController@notify')->name('omnipay.notify');
 });
 
 Route::group([
-    'namespace'     => 'Addgod\DibsD2\app\Http\Controllers',
+    'namespace'     => 'Addgod\Omnipay\app\Http\Controllers',
     'middleware'    => ['web', 'admin'],
-    'prefix'        => config('dibsd2.admin_route_prefix'),
+    'prefix'        => config('omnipay.admin_route_prefix'),
 ], function() {
-    Route::get('/capture/{transaction}', 'DibsD2Controller@capture')->name('dibsd2.capture');
-    Route::get('/void/{transaction}', 'DibsD2Controller@void')->name('dibsd2.void');
-    Route::get('/refund/{transaction}/{amount?}', 'DibsD2Controller@refund')->name('dibsd2.refund');
+    Route::get('/capture/{transaction}', 'OmnipayController@capture')->name('omnipay.capture');
+    Route::get('/void/{transaction}', 'OmnipayController@void')->name('omnipay.void');
+    Route::get('/refund/{transaction}/{amount?}', 'OmnipayController@refund')->name('omnipay.refund');
 });

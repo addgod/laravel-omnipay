@@ -1,6 +1,6 @@
 <?php
 
-namespace Addgod\DibsD2\Tests\Unit;
+namespace Addgod\Omnipay\Tests\Unit;
 
 use Orchestra\Testbench\TestCase;
 use Addgod\Omnipay\GatewayManager;
@@ -40,29 +40,12 @@ class GatewayTest extends TestCase
     protected function getPackageAliases($app)
     {
         return [
-            'DibsD2' => 'Addgod\DibsD2\Facade'
+            'Omnipay' => 'Addgod\Omnipay\Facade'
         ];
     }
 
     public function testGateway()
     {
-        DibsD2::setDefaultMerchant('default');
-    }
-
-
-    public function testController()
-    {
-        $response = $this->post('dibsd2/purchase', [
-            'returnUrl'     => url('/dibsd2/complete/purchase'),
-            'amount'        => 100.00,
-            'callbackUrl'   => url('/dibsd2/callback'),
-            'currency'      => 'DKK',
-            'orderid'       => 8,
-            'cancelurl'     => url('/'),
-        ]);
-
-        $this->artisan('route:list');
-
-        $response->assertStatus(302);
+        Omnipay::setDefaultMerchant('default');
     }
 }

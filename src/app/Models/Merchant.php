@@ -7,27 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class Merchant extends Model
 {
     protected $fillable = [
-        'merchant_id',
-        'key1',
-        'key2',
-        'username',
-        'password',
-        'lang',
-        'currency',
-        'pay_type',
+        'name',
+        'gateway',
+        'config',
     ];
 
-    public function toConfig()
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'config' => 'object',
+    ];
+
+    public function toArray()
     {
         return [
-            'merchantid'    => $this->merchant_id,
-            'key1'          => $this->key1,
-            'key2'          => $this->key2,
-            'username'      => $this->username,
-            'password'      => $this->password,
-            'lang'          => $this->lang,
-            'currency'      => $this->currency,
-            'payType'       => $this->pay_type,
+            'name' => $this->name,
+            'gateway' => $this->gateway,
+            'config' => (array) $this->config,
         ];
     }
 }

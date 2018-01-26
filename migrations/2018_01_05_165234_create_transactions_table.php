@@ -34,6 +34,7 @@ class CreateTransactionsTable extends Migration
 
         Schema::create('merchants', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('name');
             $table->string('gateway');
             $table->text('config');
             $table->timestamps();
