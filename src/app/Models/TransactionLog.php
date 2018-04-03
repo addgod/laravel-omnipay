@@ -25,6 +25,12 @@ class TransactionLog extends Model
         'payload' => 'object',
     ];
 
+
+    /**
+     * The associated transaction.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function transaction()
     {
         return $this->belongsTo(Transaction::class);

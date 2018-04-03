@@ -14,6 +14,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Transaction prefix for omnipay transactions.
+    |-------------------------------------------------------------------------
+    |
+    | If this prefix is set, then a custom id, is send to the payment gateway.
+    |
+    | This is useful for testing purposes, so that different environments
+    | can be prefixed with different ID's so they do not clash.
+    |
+    | If set to an empty string, the database ID of the transaction is only used.
+    |
+     */
+    'transaction_route_prefix' => env('OMNIPAY_TRANSACTION_PREFIX', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | Route prefix for omnipay routes behind login.
     |--------------------------------------------------------------------------
     |
