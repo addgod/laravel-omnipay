@@ -14,7 +14,7 @@
     "minimum-stability" : "dev",
     "require": {
         "laravel/framework": "~5",
-        "omnipay/omnipay": "~3",
+        "league/omnipay": "~3",
         "addgod/omnipay-dibs-d2": "~3.3"
     },
     "autoload": {
