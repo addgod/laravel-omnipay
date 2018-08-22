@@ -80,6 +80,10 @@ class Transaction extends Model
      */
     public function purchase()
     {
+        if ($this->status === Transaction::STATUS_PURCHASE) {
+            return true;
+        }
+
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_CREATED) {
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
         }
@@ -108,6 +112,10 @@ class Transaction extends Model
      */
     public function completePurchase()
     {
+        if ($this->status === Transaction::STATUS_PURCHASE_COMPLETE) {
+            return true;
+        }
+
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_PURCHASE) {
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_PURCHASE);
         }
@@ -144,6 +152,10 @@ class Transaction extends Model
      */
     public function authorize()
     {
+        if ($this->status === Transaction::STATUS_AUTHORIZE) {
+            return true;
+        }
+
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_CREATED) {
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
         }
@@ -172,6 +184,10 @@ class Transaction extends Model
      */
     public function completeAuthorize()
     {
+        if ($this->status === Transaction::STATUS_AUTHORIZE_COMPLETE) {
+            return true;
+        }
+
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE) {
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE);
         }
@@ -240,6 +256,10 @@ class Transaction extends Model
      */
     public function capture()
     {
+        if ($this->status === Transaction::STATUS_CAPTURE) {
+            return true;
+        }
+
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
         }
@@ -276,6 +296,10 @@ class Transaction extends Model
      */
     public function void()
     {
+        if ($this->status === Transaction::STATUS_VOID) {
+            return true;
+        }
+
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
         }
@@ -313,6 +337,10 @@ class Transaction extends Model
      */
     public function refund($amount = null)
     {
+        if ($this->status === Transaction::STATUS_REFUND_FULLY) {
+            return true;
+        }
+
         $allowedStates = [
             Transaction::STATUS_PURCHASE_COMPLETE,
             Transaction::STATUS_CAPTURE,
