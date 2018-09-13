@@ -91,7 +91,7 @@ class Transaction extends Model
         $omnipay = app()->make('Omnipay');
         $omnipay::setDefaultMerchant($this->merchant_id);
 
-        $response = $omnipay::purchase($this->getParameters())->send();
+        $response = $omnipay::purchase($this->getParameters('purchase'))->send();
 
         $this->status = Transaction::STATUS_PURCHASE;
         $this->save();
@@ -163,7 +163,7 @@ class Transaction extends Model
         $omnipay = app()->make('Omnipay');
         $omnipay::setDefaultMerchant($this->merchant_id);
 
-        $response = $omnipay::authorize($this->getParameters())->send();
+        $response = $omnipay::authorize($this->getParameters('authorize'))->send();
 
         $this->status = Transaction::STATUS_AUTHORIZE;
         $this->save();
@@ -422,12 +422,14 @@ class Transaction extends Model
     /**
      * Get all parameters that is used by the different requests.
      *
+     * @param string $type
+     *
      * @return array
      */
-    private function getParameters()
+    private function getParameters($type = 'authorize')
     {
         return [
-            'returnUrl'      => route('omnipay.complete.authorize', [$this->id]),
+            'returnUrl'      => route('omnipay.complete.'.$type, [$this->id]),
             'notifyUrl'      => route('omnipay.notify', [$this->id]),
             'transactionId'  => $this->transaction,
             'amount'         => $this->amount,
