@@ -81,7 +81,7 @@ class Transaction extends Model
     public function purchase()
     {
         if ($this->status === Transaction::STATUS_PURCHASE) {
-            return true;
+            return response('<script>window.history.back()</script>');
         }
 
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_CREATED) {
@@ -113,7 +113,7 @@ class Transaction extends Model
     public function completePurchase()
     {
         if ($this->status === Transaction::STATUS_PURCHASE_COMPLETE) {
-            return true;
+            return response('<script>window.history.back()</script>');
         }
 
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_PURCHASE) {
@@ -153,7 +153,7 @@ class Transaction extends Model
     public function authorize()
     {
         if ($this->status === Transaction::STATUS_AUTHORIZE) {
-            return true;
+            return response('<script>window.history.back()</script>');
         }
 
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_CREATED) {
@@ -185,7 +185,7 @@ class Transaction extends Model
     public function completeAuthorize()
     {
         if ($this->status === Transaction::STATUS_AUTHORIZE_COMPLETE) {
-            return true;
+            return response('<script>window.history.back()</script>');
         }
 
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE) {
@@ -257,7 +257,7 @@ class Transaction extends Model
     public function capture()
     {
         if ($this->status === Transaction::STATUS_CAPTURE) {
-            return true;
+            return response('<script>window.history.back()</script>');
         }
 
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
@@ -297,7 +297,7 @@ class Transaction extends Model
     public function void()
     {
         if ($this->status === Transaction::STATUS_VOID) {
-            return true;
+            return response('<script>window.history.back()</script>');
         }
 
         if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
@@ -338,7 +338,7 @@ class Transaction extends Model
     public function refund($amount = null)
     {
         if ($this->status === Transaction::STATUS_REFUND_FULLY) {
-            return true;
+            return response('<script>window.history.back()</script>');
         }
 
         $allowedStates = [
