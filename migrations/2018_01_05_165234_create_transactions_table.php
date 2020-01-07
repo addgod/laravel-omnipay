@@ -27,7 +27,7 @@ class CreateTransactionsTable extends Migration
         Schema::create('omnipay_transaction_logs', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('transaction_id');
-            $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
+            $table->foreign('transaction_id')->references('id')->on('omnipay_transactions')->onDelete('cascade');
             $table->text('payload')->nullable();
             $table->timestamps();
         });
@@ -42,7 +42,7 @@ class CreateTransactionsTable extends Migration
 
         Schema::create('merchantables', function (Blueprint $table) {
             $table->unsignedInteger('merchant_id');
-            $table->foreign('merchant_id')->references('id')->on('merchants')->onDelete('cascade');
+            $table->foreign('merchant_id')->references('id')->on('omnipay_merchants')->onDelete('cascade');
             $table->morphs('merchantable');
         });
     }
@@ -55,9 +55,9 @@ class CreateTransactionsTable extends Migration
     public function down()
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('transaction_logs');
-        Schema::dropIfExists('transactions');
-        Schema::dropIfExists('merchants');
+        Schema::dropIfExists('omnipay_transaction_logs');
+        Schema::dropIfExists('omnipay_transactions');
+        Schema::dropIfExists('omnipay_merchants');
         Schema::dropIfExists('merchantables');
         Schema::enableForeignKeyConstraints();
     }
