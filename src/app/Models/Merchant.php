@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Merchant extends Model
 {
+    protected $table = 'omnipay_merchants';
+
     protected $fillable = [
         'name',
         'gateway',
@@ -24,9 +26,9 @@ class Merchant extends Model
     public function toArray()
     {
         return [
-            'name' => $this->name,
+            'name'    => $this->name,
             'gateway' => $this->gateway,
-            'config' => (array) $this->config,
+            'config'  => (array) $this->config,
         ];
     }
 }

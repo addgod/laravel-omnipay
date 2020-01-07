@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class TransactionLog extends Model
 {
 
+    protected $table = 'omnipay_transaction_logs';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -25,10 +27,9 @@ class TransactionLog extends Model
         'payload' => 'object',
     ];
 
-
     /**
      * The associated transaction.
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function transaction()

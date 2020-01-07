@@ -17,6 +17,8 @@ class Transaction extends Model
     const STATUS_VOID               = 8;
     const STATUS_DECLINED           = 9;
 
+    protected $table = 'omnipay_transactions';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -62,6 +64,7 @@ class Transaction extends Model
      * Saves the model.
      *
      * @param array $options
+     *
      * @return bool
      */
     public function save(array $options = [])
@@ -69,6 +72,7 @@ class Transaction extends Model
         if (empty($this->attributes['merchant_id'])) {
             $this->attributes['merchant_id'] = config('omnipay.default_merchant');
         }
+
         return parent::save($options);
     }
 
@@ -135,10 +139,10 @@ class Transaction extends Model
 
         $this->logs()->create([
             'payload' => [
-                'action'    => 'Complete Purchase',
-                'message'   => $response->getMessage(),
-                'data'      => $response->getData(),
-            ]
+                'action'  => 'Complete Purchase',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
         ]);
 
         return true;
@@ -208,10 +212,10 @@ class Transaction extends Model
 
         $this->logs()->create([
             'payload' => [
-                'action'    => 'Complete Authorization',
-                'message'    => $response->getMessage(),
-                'data'      => $response->getData()
-            ]
+                'action'  => 'Complete Authorization',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
         ]);
 
         return true;
@@ -236,15 +240,16 @@ class Transaction extends Model
 
         $this->logs()->create([
             'payload' => [
-                'action'    => 'Re-Authorization',
-                'message'    => $response->getMessage(),
-                'data'      => $response->getData()
-            ]
+                'action'  => 'Re-Authorization',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
         ]);
 
         if (!$response->isSuccessful()) {
             throw new \RuntimeException('Re-authorization failed');
         }
+
         return true;
     }
 
@@ -271,11 +276,11 @@ class Transaction extends Model
 
         $this->logs()->create([
             'payload' => [
-                'action'    => 'Capture',
-                'user'      => \Auth::check() ? \Auth::user()->toArray() : 'Automatic',
-                'message'    => $response->getMessage(),
-                'data'      => $response->getData()
-            ]
+                'action'  => 'Capture',
+                'user'    => \Auth::check() ? \Auth::user()->toArray() : 'Automatic',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
         ]);
 
         if ($response->isSuccessful()) {
@@ -311,11 +316,11 @@ class Transaction extends Model
 
         $this->logs()->create([
             'payload' => [
-                'action'    => 'Void',
-                'user'      => \Auth::check() ? \Auth::user()->toArray() : 'Automatic',
-                'message'    => $response->getMessage(),
-                'data'      => $response->getData()
-            ]
+                'action'  => 'Void',
+                'user'    => \Auth::check() ? \Auth::user()->toArray() : 'Automatic',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
         ]);
 
         if ($response->isSuccessful()) {
@@ -332,6 +337,7 @@ class Transaction extends Model
      * Sends a refund request to the payment gateway.
      *
      * @param null $amount
+     *
      * @return bool
      * @throws \RuntimeException
      */
@@ -344,7 +350,7 @@ class Transaction extends Model
         $allowedStates = [
             Transaction::STATUS_PURCHASE_COMPLETE,
             Transaction::STATUS_CAPTURE,
-            Transaction::STATUS_REFUND_PARTIALLY
+            Transaction::STATUS_REFUND_PARTIALLY,
         ];
         if (!$this->isUnguarded() && !in_array($this->status, $allowedStates)) {
             throw new \RuntimeException('Invalid state. Must have status of ' . implode(' or ', $allowedStates));
@@ -362,11 +368,11 @@ class Transaction extends Model
 
         $this->logs()->create([
             'payload' => [
-                'action'    => 'Refund',
-                'user'      => \Auth::user()->toArray(),
-                'message'    => $response->getMessage(),
-                'data'      => $response->getData()
-            ]
+                'action'  => 'Refund',
+                'user'    => \Auth::user()->toArray(),
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
         ]);
 
         if ($response->isSuccessful()) {
@@ -412,10 +418,10 @@ class Transaction extends Model
 
         $this->logs()->create([
             'payload' => [
-                'action'    => 'Notify',
-                'message'    => $response->getMessage(),
-                'data'      => $response->getData()
-            ]
+                'action'  => 'Notify',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
         ]);
     }
 
@@ -429,11 +435,11 @@ class Transaction extends Model
     private function getParameters($type = 'authorize')
     {
         return [
-            'returnUrl'      => route('omnipay.complete.'.$type, [$this->id]),
-            'notifyUrl'      => route('omnipay.notify', [$this->id]),
-            'transactionId'  => $this->transaction,
-            'amount'         => $this->amount,
-            'orderId'        => config('omnipay.transaction_route_prefix') . $this->id,
+            'returnUrl'     => route('omnipay.complete.' . $type, [$this->id]),
+            'notifyUrl'     => route('omnipay.notify', [$this->id]),
+            'transactionId' => $this->transaction,
+            'amount'        => $this->amount,
+            'orderId'       => config('omnipay.transaction_route_prefix') . $this->id,
         ];
     }
 }
