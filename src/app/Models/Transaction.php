@@ -128,7 +128,7 @@ class Transaction extends Model
         $omnipay::setDefaultMerchant($this->merchant_id);
         $response = $omnipay::completePurchase()->send();
 
-        $this->transaction = $response->getTransactionId();
+        $this->transaction = $response->getTransactionReference();
 
         if ($response->isSuccessful()) {
             $this->status = Transaction::STATUS_PURCHASE_COMPLETE;
@@ -200,7 +200,7 @@ class Transaction extends Model
         $omnipay::setDefaultMerchant($this->merchant_id);
         $response = $omnipay::completeAuthorize()->send();
 
-        $this->transaction = $response->getTransactionId();
+        $this->transaction = $response->getTransactionReference();
 
         if ($response->isSuccessful()) {
             $this->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
@@ -402,7 +402,7 @@ class Transaction extends Model
         $omnipay::setDefaultMerchant($this->merchant_id);
         $response = $omnipay::acceptNotification()->send();
 
-        $this->transaction = $response->getTransactionId();
+        $this->transaction = $response->getTransactionReference();
 
         if ($response->isSuccessful()) {
             if ($this->status == Transaction::STATUS_PURCHASE) {
