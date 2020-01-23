@@ -434,12 +434,13 @@ class Transaction extends Model
      */
     private function getParameters($type = 'authorize')
     {
+        $prefixedTransactionId = config('omnipay.transaction_route_prefix') . $this->id;
+
         return [
             'returnUrl'     => route('omnipay.complete.' . $type, [$this->id]),
             'notifyUrl'     => route('omnipay.notify', [$this->id]),
-            'transactionId' => $this->transaction,
+            'transactionId' => $this->transaction ?? $prefixedTransactionId,
             'amount'        => $this->amount,
-            'orderId'       => config('omnipay.transaction_route_prefix') . $this->id,
         ];
     }
 }
