@@ -8,9 +8,9 @@ Route::group([
     Route::get('/purchase/{transaction}', 'OmnipayController@purchase')->name('omnipay.purchase');
     Route::get('/authorize/{transaction}', 'OmnipayController@authorize')->name('omnipay.authorize');
     Route::get('/re-authorize/{transaction}', 'OmnipayController@reAuthorize')->name('omnipay.re-authorize');
-    Route::post('/complete/purchase/{transaction}', 'OmnipayController@completePurchase')->name('omnipay.complete.purchase');
-    Route::post('/complete/authorize/{transaction}', 'OmnipayController@completeAuthorize')->name('omnipay.complete.authorize');
-    Route::post('/notify/{transaction}', 'OmnipayController@notify')->name('omnipay.notify');
+    Route::any('/complete/purchase/{transaction}', 'OmnipayController@completePurchase')->name('omnipay.complete.purchase');
+    Route::any('/complete/authorize/{transaction}', 'OmnipayController@completeAuthorize')->name('omnipay.complete.authorize');
+    Route::any('/notify/{transaction}', 'OmnipayController@notify')->name('omnipay.notify');
 });
 
 Route::group([
