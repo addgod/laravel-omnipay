@@ -1,21 +1,22 @@
 <?php
 
-namespace Addgod\Omnipay\app\Models;
+namespace Addgod\Omnipay\Models;
 
+use Addgod\Omnipay\Facades\Omnipay;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
-    const STATUS_CREATED            = 0;
-    const STATUS_PURCHASE           = 1;
-    const STATUS_PURCHASE_COMPLETE  = 2;
-    const STATUS_AUTHORIZE          = 3;
+    const STATUS_CREATED = 0;
+    const STATUS_PURCHASE = 1;
+    const STATUS_PURCHASE_COMPLETE = 2;
+    const STATUS_AUTHORIZE = 3;
     const STATUS_AUTHORIZE_COMPLETE = 4;
-    const STATUS_CAPTURE            = 5;
-    const STATUS_REFUND_PARTIALLY   = 6;
-    const STATUS_REFUND_FULLY       = 7;
-    const STATUS_VOID               = 8;
-    const STATUS_DECLINED           = 9;
+    const STATUS_CAPTURE = 5;
+    const STATUS_REFUND_PARTIALLY = 6;
+    const STATUS_REFUND_FULLY = 7;
+    const STATUS_VOID = 8;
+    const STATUS_DECLINED = 9;
 
     protected $table = 'omnipay_transactions';
 
@@ -80,6 +81,7 @@ class Transaction extends Model
      * Send a purchase request to the payment gateway
      *
      * @return bool
+     *
      * @throws \RuntimeException
      */
     public function purchase()
@@ -92,10 +94,8 @@ class Transaction extends Model
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
         }
 
-        $omnipay = app()->make('Omnipay');
-        $omnipay::setDefaultMerchant($this->merchant_id);
-
-        $response = $omnipay::purchase($this->getParameters('purchase'))->send();
+        Omnipay::setDefaultMerchant($this->merchant_id);
+        $response = Omnipay::purchase($this->getParameters('purchase'))->send();
 
         $this->status = Transaction::STATUS_PURCHASE;
         $this->save();
@@ -124,9 +124,8 @@ class Transaction extends Model
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_PURCHASE);
         }
 
-        $omnipay = app()->make('Omnipay');
-        $omnipay::setDefaultMerchant($this->merchant_id);
-        $response = $omnipay::completePurchase()->send();
+        Omnipay::setDefaultMerchant($this->merchant_id);
+        $response = Omnipay::completePurchase()->send();
 
         $this->transaction = $response->getTransactionReference();
 
@@ -152,6 +151,7 @@ class Transaction extends Model
      * Sends a authorizeation request to the payment gateway.
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     *
      * @throws \RuntimeException
      */
     public function authorize()
@@ -164,10 +164,8 @@ class Transaction extends Model
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
         }
 
-        $omnipay = app()->make('Omnipay');
-        $omnipay::setDefaultMerchant($this->merchant_id);
-
-        $response = $omnipay::authorize($this->getParameters('authorize'))->send();
+        Omnipay::setDefaultMerchant($this->merchant_id);
+        $response = Omnipay::authorize($this->getParameters('authorize'))->send();
 
         $this->status = Transaction::STATUS_AUTHORIZE;
         $this->save();
@@ -196,9 +194,8 @@ class Transaction extends Model
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE);
         }
 
-        $omnipay = app()->make('Omnipay');
-        $omnipay::setDefaultMerchant($this->merchant_id);
-        $response = $omnipay::completeAuthorize()->send();
+        Omnipay::setDefaultMerchant($this->merchant_id);
+        $response = Omnipay::completeAuthorize()->send();
 
         $this->transaction = $response->getTransactionReference();
 
@@ -225,6 +222,7 @@ class Transaction extends Model
      * Sends a re-authorization request to the payment gateway
      *
      * @return bool
+     *
      * @throws \RuntimeException
      */
     public function reAuthorize()
@@ -233,10 +231,8 @@ class Transaction extends Model
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
         }
 
-        $omnipay = app()->make('Omnipay');
-        $omnipay::setDefaultMerchant($this->merchant_id);
-
-        $response = $omnipay::reAuthorize($this->getParameters())->send();
+        Omnipay::setDefaultMerchant($this->merchant_id);
+        $response = Omnipay::reAuthorize($this->getParameters())->send();
 
         $this->logs()->create([
             'payload' => [
@@ -257,6 +253,7 @@ class Transaction extends Model
      * Sends a capture request to the payment gateway.
      *
      * @return bool
+     *
      * @throws \RuntimeException
      */
     public function capture()
@@ -269,10 +266,8 @@ class Transaction extends Model
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
         }
 
-        $omnipay = app()->make('Omnipay');
-        $omnipay::setDefaultMerchant($this->merchant_id);
-
-        $response = $omnipay::capture($this->getParameters())->send();
+        Omnipay::setDefaultMerchant($this->merchant_id);
+        $response = Omnipay::capture($this->getParameters())->send();
 
         $this->logs()->create([
             'payload' => [
@@ -297,6 +292,7 @@ class Transaction extends Model
      * Sends a void request to the payment gateway.
      *
      * @return bool
+     *
      * @throws \RuntimeException
      */
     public function void()
@@ -309,10 +305,8 @@ class Transaction extends Model
             throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
         }
 
-        $omnipay = app()->make('Omnipay');
-        $omnipay::setDefaultMerchant($this->merchant_id);
-
-        $response = $omnipay::void($this->getParameters())->send();
+        Omnipay::setDefaultMerchant($this->merchant_id);
+        $response = Omnipay::void($this->getParameters())->send();
 
         $this->logs()->create([
             'payload' => [
@@ -339,6 +333,7 @@ class Transaction extends Model
      * @param null $amount
      *
      * @return bool
+     *
      * @throws \RuntimeException
      */
     public function refund($amount = null)
@@ -356,15 +351,14 @@ class Transaction extends Model
             throw new \RuntimeException('Invalid state. Must have status of ' . implode(' or ', $allowedStates));
         }
 
-        $omnipay = app()->make('Omnipay');
-        $omnipay::setDefaultMerchant($this->merchant_id);
+        Omnipay::setDefaultMerchant($this->merchant_id);
 
         $params = $this->getParameters();
         if ($amount) {
             $params['amount'] = $amount;
         }
 
-        $response = $omnipay::refund($params)->send();
+        $response = Omnipay::refund($params)->send();
 
         $this->logs()->create([
             'payload' => [
@@ -398,9 +392,8 @@ class Transaction extends Model
      */
     public function notify()
     {
-        $omnipay = app()->make('Omnipay');
-        $omnipay::setDefaultMerchant($this->merchant_id);
-        $response = $omnipay::acceptNotification()->send();
+        Omnipay::setDefaultMerchant($this->merchant_id);
+        $response = Omnipay::acceptNotification()->send();
 
         $this->transaction = $response->getTransactionReference();
 
@@ -437,10 +430,11 @@ class Transaction extends Model
         $prefixedTransactionId = config('omnipay.transaction_route_prefix') . $this->id;
 
         return [
-            'returnUrl'     => route('omnipay.complete.' . $type, [$this->id]),
-            'notifyUrl'     => route('omnipay.notify', [$this->id]),
-            'transactionId' => $this->transaction ?? $prefixedTransactionId,
-            'amount'        => $this->amount,
+            'returnUrl'            => route('omnipay.complete.' . $type, [$this->id]),
+            'notifyUrl'            => route('omnipay.notify', [$this->id]),
+            'transactionReference' => $this->transaction ?? null,
+            'transactionId'        => $prefixedTransactionId,
+            'amount'               => $this->amount,
         ];
     }
 }

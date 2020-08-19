@@ -13,7 +13,7 @@
 ## Usage
 
 ```
-use Addgod\Omnipay\app\Models\Transaction
+use Addgod\Omnipay\Models\Transaction
 
 $transaction = Transaction::make([
     'amount' => 10000

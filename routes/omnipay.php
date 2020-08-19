@@ -1,7 +1,7 @@
 <?php
 
 Route::group([
-    'namespace'     => 'Addgod\Omnipay\app\Http\Controllers',
+    'namespace'     => 'Addgod\Omnipay\Http\Controllers',
     'middleware'    => 'bindings',
     'prefix'        => config('omnipay.public_route_prefix'),
 ], function() {
@@ -14,7 +14,7 @@ Route::group([
 });
 
 Route::group([
-    'namespace'     => 'Addgod\Omnipay\app\Http\Controllers',
+    'namespace'     => 'Addgod\Omnipay\Http\Controllers',
     'middleware'    => ['web', 'admin'],
     'prefix'        => config('omnipay.admin_route_prefix'),
 ], function() {

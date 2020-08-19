@@ -1,8 +1,8 @@
 <?php
-namespace Addgod\Omnipay;
+namespace Addgod\Omnipay\Facades;
 
 
-class Facade extends \Illuminate\Support\Facades\Facade
+class Omnipay extends \Illuminate\Support\Facades\Facade
 {
 
     /**

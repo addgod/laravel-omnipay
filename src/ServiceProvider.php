@@ -1,4 +1,5 @@
 <?php
+
 namespace Addgod\Omnipay;
 
 use Omnipay\Common\GatewayFactory;
@@ -22,12 +23,13 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $configPath = __DIR__ . '/../config/omnipay.php';
         $this->publishes([$configPath => config_path('omnipay.php')]);
 
-        $this->loadRoutesFrom(__DIR__. '/../routes/omnipay.php');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/omnipay.php');
 
-        $this->loadMigrationsFrom(__DIR__.'/../migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../migrations');
 
-        $this->app->singleton('omnipay',function ($app){
-            $defaults = $app['config']->get('omnipay.defaults', array());
+        $this->app->singleton('omnipay', function ($app) {
+            $defaults = $app['config']->get('omnipay.defaults', []);
+
             return new GatewayManager($app, new GatewayFactory, $defaults);
         });
     }
@@ -39,6 +41,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function provides()
     {
-        return array('omnipay');
+        return ['omnipay'];
     }
 }

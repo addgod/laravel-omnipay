@@ -1,6 +1,6 @@
 <?php
 
-namespace Addgod\Omnipay\app\Models;
+namespace Addgod\Omnipay\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
