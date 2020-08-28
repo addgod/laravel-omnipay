@@ -4,6 +4,7 @@ namespace Addgod\Omnipay\Models;
 
 use Addgod\Omnipay\Facades\Omnipay;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Transaction extends Model
 {
@@ -272,7 +273,7 @@ class Transaction extends Model
         $this->logs()->create([
             'payload' => [
                 'action'  => 'Capture',
-                'user'    => \Auth::check() ? \Auth::user()->toArray() : 'Automatic',
+                'user'    => Auth::check() ? Auth::user()->toArray() : 'Automatic',
                 'message' => $response->getMessage(),
                 'data'    => $response->getData(),
             ],
