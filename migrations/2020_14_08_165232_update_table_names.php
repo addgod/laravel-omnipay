@@ -50,7 +50,7 @@ class UpdateTableNames extends Migration
         });
 
         Schema::rename('omnipay_transactions', 'transactions');
-        Schema::rename('omnipay_transaction_logs', 'transactions_logs');
+        Schema::rename('omnipay_transaction_logs', 'transaction_logs');
         Schema::rename('omnipay_merchants', 'merchants');
 
         Schema::table('transaction_logs', function (Blueprint $table) {
