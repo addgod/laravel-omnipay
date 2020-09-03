@@ -130,13 +130,6 @@ class Transaction extends Model
 
         $this->transaction = $response->getTransactionReference();
 
-        if ($response->isSuccessful()) {
-            $this->status = Transaction::STATUS_PURCHASE_COMPLETE;
-        } else {
-            $this->status = Transaction::STATUS_DECLINED;
-        }
-        $this->save();
-
         $this->logs()->create([
             'payload' => [
                 'action'  => 'Complete Purchase',
@@ -144,6 +137,13 @@ class Transaction extends Model
                 'data'    => $response->getData(),
             ],
         ]);
+
+        if ($response->isSuccessful()) {
+            $this->status = Transaction::STATUS_PURCHASE_COMPLETE;
+        } else {
+            $this->status = Transaction::STATUS_DECLINED;
+        }
+        $this->save();
 
         return true;
     }
@@ -200,14 +200,6 @@ class Transaction extends Model
 
         $this->transaction = $response->getTransactionReference();
 
-        if ($response->isSuccessful()) {
-            $this->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
-        } else {
-            $this->status = Transaction::STATUS_DECLINED;
-        }
-
-        $this->save();
-
         $this->logs()->create([
             'payload' => [
                 'action'  => 'Complete Authorization',
@@ -215,6 +207,14 @@ class Transaction extends Model
                 'data'    => $response->getData(),
             ],
         ]);
+
+        if ($response->isSuccessful()) {
+            $this->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
+        } else {
+            $this->status = Transaction::STATUS_DECLINED;
+        }
+
+        $this->save();
 
         return true;
     }
@@ -398,6 +398,14 @@ class Transaction extends Model
 
         $this->transaction = $response->getTransactionReference();
 
+        $this->logs()->create([
+            'payload' => [
+                'action'  => 'Notify',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
+
         if ($response->isSuccessful()) {
             if ($this->status == Transaction::STATUS_PURCHASE) {
                 $this->status = Transaction::STATUS_PURCHASE_COMPLETE;
@@ -409,14 +417,6 @@ class Transaction extends Model
         }
 
         $this->save();
-
-        $this->logs()->create([
-            'payload' => [
-                'action'  => 'Notify',
-                'message' => $response->getMessage(),
-                'data'    => $response->getData(),
-            ],
-        ]);
     }
 
     /**
