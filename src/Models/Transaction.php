@@ -32,6 +32,16 @@ class Transaction extends Model
         'status',
         'amount',
         'redirect_to',
+        'config',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'config' => 'array',
     ];
 
     /**
@@ -79,7 +89,7 @@ class Transaction extends Model
     }
 
     /**
-     * Send a purchase request to the payment gateway
+     * Send a purchase request to the payment gateway.
      *
      * @return bool
      *
@@ -87,18 +97,18 @@ class Transaction extends Model
      */
     public function purchase()
     {
-        if ($this->status === Transaction::STATUS_PURCHASE) {
+        if ($this->status === self::STATUS_PURCHASE) {
             return response('<script>window.history.back()</script>');
         }
 
-        if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_CREATED) {
-            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
+        if (!$this->isUnguarded() && $this->status !== self::STATUS_CREATED) {
+            throw new \RuntimeException('Invalid state. Must have status of ' . self::STATUS_CREATED);
         }
 
         Omnipay::setDefaultMerchant($this->merchant_id);
         $response = Omnipay::purchase($this->getParameters('purchase'))->send();
 
-        $this->status = Transaction::STATUS_PURCHASE;
+        $this->status = self::STATUS_PURCHASE;
         $this->save();
 
         if ($response->isSuccessful()) {
@@ -111,18 +121,18 @@ class Transaction extends Model
     }
 
     /**
-     * Get a purchase response from the payment gateway
+     * Get a purchase response from the payment gateway.
      *
      * @return bool
      */
     public function completePurchase()
     {
-        if ($this->status === Transaction::STATUS_PURCHASE_COMPLETE) {
+        if ($this->status === self::STATUS_PURCHASE_COMPLETE) {
             return response('<script>window.history.back()</script>');
         }
 
-        if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_PURCHASE) {
-            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_PURCHASE);
+        if (!$this->isUnguarded() && $this->status !== self::STATUS_PURCHASE) {
+            throw new \RuntimeException('Invalid state. Must have status of ' . self::STATUS_PURCHASE);
         }
 
         Omnipay::setDefaultMerchant($this->merchant_id);
@@ -139,9 +149,9 @@ class Transaction extends Model
         ]);
 
         if ($response->isSuccessful()) {
-            $this->status = Transaction::STATUS_PURCHASE_COMPLETE;
+            $this->status = self::STATUS_PURCHASE_COMPLETE;
         } else {
-            $this->status = Transaction::STATUS_DECLINED;
+            $this->status = self::STATUS_DECLINED;
         }
         $this->save();
 
@@ -157,18 +167,18 @@ class Transaction extends Model
      */
     public function authorize()
     {
-        if ($this->status === Transaction::STATUS_AUTHORIZE) {
+        if ($this->status === self::STATUS_AUTHORIZE) {
             return response('<script>window.history.back()</script>');
         }
 
-        if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_CREATED) {
-            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
+        if (!$this->isUnguarded() && $this->status !== self::STATUS_CREATED) {
+            throw new \RuntimeException('Invalid state. Must have status of ' . self::STATUS_CREATED);
         }
 
         Omnipay::setDefaultMerchant($this->merchant_id);
         $response = Omnipay::authorize($this->getParameters('authorize'))->send();
 
-        $this->status = Transaction::STATUS_AUTHORIZE;
+        $this->status = self::STATUS_AUTHORIZE;
         $this->save();
 
         if ($response->isSuccessful()) {
@@ -181,18 +191,18 @@ class Transaction extends Model
     }
 
     /**
-     * Get a authorization response from the payment gateway
+     * Get a authorization response from the payment gateway.
      *
      * @return bool
      */
     public function completeAuthorize()
     {
-        if ($this->status === Transaction::STATUS_AUTHORIZE_COMPLETE) {
+        if ($this->status === self::STATUS_AUTHORIZE_COMPLETE) {
             return response('<script>window.history.back()</script>');
         }
 
-        if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE) {
-            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE);
+        if (!$this->isUnguarded() && $this->status !== self::STATUS_AUTHORIZE) {
+            throw new \RuntimeException('Invalid state. Must have status of ' . self::STATUS_AUTHORIZE);
         }
 
         Omnipay::setDefaultMerchant($this->merchant_id);
@@ -209,9 +219,9 @@ class Transaction extends Model
         ]);
 
         if ($response->isSuccessful()) {
-            $this->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
+            $this->status = self::STATUS_AUTHORIZE_COMPLETE;
         } else {
-            $this->status = Transaction::STATUS_DECLINED;
+            $this->status = self::STATUS_DECLINED;
         }
 
         $this->save();
@@ -220,7 +230,7 @@ class Transaction extends Model
     }
 
     /**
-     * Sends a re-authorization request to the payment gateway
+     * Sends a re-authorization request to the payment gateway.
      *
      * @return bool
      *
@@ -228,8 +238,8 @@ class Transaction extends Model
      */
     public function reAuthorize()
     {
-        if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
-            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
+        if (!$this->isUnguarded() && $this->status !== self::STATUS_AUTHORIZE_COMPLETE) {
+            throw new \RuntimeException('Invalid state. Must have status of ' . self::STATUS_AUTHORIZE_COMPLETE);
         }
 
         Omnipay::setDefaultMerchant($this->merchant_id);
@@ -259,12 +269,12 @@ class Transaction extends Model
      */
     public function capture()
     {
-        if ($this->status === Transaction::STATUS_CAPTURE) {
+        if ($this->status === self::STATUS_CAPTURE) {
             return response('<script>window.history.back()</script>');
         }
 
-        if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
-            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
+        if (!$this->isUnguarded() && $this->status !== self::STATUS_AUTHORIZE_COMPLETE) {
+            throw new \RuntimeException('Invalid state. Must have status of ' . self::STATUS_AUTHORIZE_COMPLETE);
         }
 
         Omnipay::setDefaultMerchant($this->merchant_id);
@@ -280,7 +290,7 @@ class Transaction extends Model
         ]);
 
         if ($response->isSuccessful()) {
-            $this->status = Transaction::STATUS_CAPTURE;
+            $this->status = self::STATUS_CAPTURE;
             $this->save();
         } else {
             throw new \RuntimeException('Capture of payment failed');
@@ -298,12 +308,12 @@ class Transaction extends Model
      */
     public function void()
     {
-        if ($this->status === Transaction::STATUS_VOID) {
+        if ($this->status === self::STATUS_VOID) {
             return response('<script>window.history.back()</script>');
         }
 
-        if (!$this->isUnguarded() && $this->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
-            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
+        if (!$this->isUnguarded() && $this->status !== self::STATUS_AUTHORIZE_COMPLETE) {
+            throw new \RuntimeException('Invalid state. Must have status of ' . self::STATUS_AUTHORIZE_COMPLETE);
         }
 
         Omnipay::setDefaultMerchant($this->merchant_id);
@@ -319,7 +329,7 @@ class Transaction extends Model
         ]);
 
         if ($response->isSuccessful()) {
-            $this->status = Transaction::STATUS_VOID;
+            $this->status = self::STATUS_VOID;
             $this->save();
         } else {
             throw new \RuntimeException('Void of payment failed');
@@ -339,16 +349,16 @@ class Transaction extends Model
      */
     public function refund($amount = null)
     {
-        if ($this->status === Transaction::STATUS_REFUND_FULLY) {
+        if ($this->status === self::STATUS_REFUND_FULLY) {
             return response('<script>window.history.back()</script>');
         }
 
         $allowedStates = [
-            Transaction::STATUS_PURCHASE_COMPLETE,
-            Transaction::STATUS_CAPTURE,
-            Transaction::STATUS_REFUND_PARTIALLY,
+            self::STATUS_PURCHASE_COMPLETE,
+            self::STATUS_CAPTURE,
+            self::STATUS_REFUND_PARTIALLY,
         ];
-        if (!$this->isUnguarded() && !in_array($this->status, $allowedStates)) {
+        if (!$this->isUnguarded() && !\in_array($this->status, $allowedStates)) {
             throw new \RuntimeException('Invalid state. Must have status of ' . implode(' or ', $allowedStates));
         }
 
@@ -371,11 +381,11 @@ class Transaction extends Model
         ]);
 
         if ($response->isSuccessful()) {
-            if (!is_null($amount) && $amount < $this->amount) {
-                $this->status = Transaction::STATUS_REFUND_PARTIALLY;
+            if (!\is_null($amount) && $amount < $this->amount) {
+                $this->status = self::STATUS_REFUND_PARTIALLY;
                 $this->amount = $this->amount - $amount;
             } else {
-                $this->status = Transaction::STATUS_REFUND_FULLY;
+                $this->status = self::STATUS_REFUND_FULLY;
                 $this->amount = 0;
             }
             $this->save();
@@ -407,13 +417,13 @@ class Transaction extends Model
         ]);
 
         if ($response->isSuccessful()) {
-            if ($this->status == Transaction::STATUS_PURCHASE) {
-                $this->status = Transaction::STATUS_PURCHASE_COMPLETE;
-            } elseif ($this->status == Transaction::STATUS_AUTHORIZE) {
-                $this->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
+            if ($this->status == self::STATUS_PURCHASE) {
+                $this->status = self::STATUS_PURCHASE_COMPLETE;
+            } elseif ($this->status == self::STATUS_AUTHORIZE) {
+                $this->status = self::STATUS_AUTHORIZE_COMPLETE;
             }
         } else {
-            $this->status = Transaction::STATUS_DECLINED;
+            $this->status = self::STATUS_DECLINED;
         }
 
         $this->save();
@@ -430,12 +440,12 @@ class Transaction extends Model
     {
         $prefixedTransactionId = config('omnipay.transaction_route_prefix') . $this->id;
 
-        return [
+        return array_merge([
             'returnUrl'            => route('omnipay.complete.' . $type, [$this->id]),
             'notifyUrl'            => route('omnipay.notify', [$this->id]),
             'transactionReference' => $this->transaction ?? null,
             'transactionId'        => $prefixedTransactionId,
             'amount'               => $this->amount,
-        ];
+        ], $this->config);
     }
 }
