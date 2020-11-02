@@ -446,6 +446,6 @@ class Transaction extends Model
             'transactionReference' => $this->transaction ?? null,
             'transactionId'        => $prefixedTransactionId,
             'amount'               => $this->amount,
-        ], $this->config);
+        ], ($this->config ?? []));
     }
 }
