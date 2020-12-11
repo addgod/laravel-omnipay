@@ -138,7 +138,7 @@ class Transaction extends Model
         Omnipay::setDefaultMerchant($this->merchant_id);
         $response = Omnipay::completePurchase()->send();
 
-        $this->transaction = $response->getTransactionReference();
+        $this->transaction = $response->getTransactionId();
 
         $this->logs()->create([
             'payload' => [
@@ -208,7 +208,7 @@ class Transaction extends Model
         Omnipay::setDefaultMerchant($this->merchant_id);
         $response = Omnipay::completeAuthorize()->send();
 
-        $this->transaction = $response->getTransactionReference();
+        $this->transaction = $response->getTransactionId();
 
         $this->logs()->create([
             'payload' => [
@@ -406,7 +406,7 @@ class Transaction extends Model
         Omnipay::setDefaultMerchant($this->merchant_id);
         $response = Omnipay::acceptNotification()->send();
 
-        $this->transaction = $response->getTransactionReference();
+        $this->transaction = $response->getTransactionId();
 
         $this->logs()->create([
             'payload' => [
@@ -443,8 +443,8 @@ class Transaction extends Model
         return array_merge([
             'returnUrl'            => route('omnipay.complete.' . $type, [$this->id]),
             'notifyUrl'            => route('omnipay.notify', [$this->id]),
-            'transactionReference' => $this->transaction ?? null,
-            'transactionId'        => $prefixedTransactionId,
+            'transactionReference' => $prefixedTransactionId,
+            'transactionId'        => $this->transaction ?? null,
             'amount'               => $this->amount,
         ], ($this->config ?? []));
     }
