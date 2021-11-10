@@ -8,16 +8,16 @@ use Illuminate\Support\Facades\Auth;
 
 class Transaction extends Model
 {
-    const STATUS_CREATED = 0;
-    const STATUS_PURCHASE = 1;
-    const STATUS_PURCHASE_COMPLETE = 2;
-    const STATUS_AUTHORIZE = 3;
-    const STATUS_AUTHORIZE_COMPLETE = 4;
-    const STATUS_CAPTURE = 5;
-    const STATUS_REFUND_PARTIALLY = 6;
-    const STATUS_REFUND_FULLY = 7;
-    const STATUS_VOID = 8;
-    const STATUS_DECLINED = 9;
+    public const STATUS_CREATED = 0;
+    public const STATUS_PURCHASE = 1;
+    public const STATUS_PURCHASE_COMPLETE = 2;
+    public const STATUS_AUTHORIZE = 3;
+    public const STATUS_AUTHORIZE_COMPLETE = 4;
+    public const STATUS_CAPTURE = 5;
+    public const STATUS_REFUND_PARTIALLY = 6;
+    public const STATUS_REFUND_FULLY = 7;
+    public const STATUS_VOID = 8;
+    public const STATUS_DECLINED = 9;
 
     protected $table = 'omnipay_transactions';
 
@@ -138,7 +138,7 @@ class Transaction extends Model
         Omnipay::setDefaultMerchant($this->merchant_id);
         $response = Omnipay::completePurchase()->send();
 
-        $this->transaction = $response->getTransactionId();
+        $this->transaction = $response->getTransactionReference();
 
         $this->logs()->create([
             'payload' => [
@@ -208,7 +208,7 @@ class Transaction extends Model
         Omnipay::setDefaultMerchant($this->merchant_id);
         $response = Omnipay::completeAuthorize()->send();
 
-        $this->transaction = $response->getTransactionId();
+        $this->transaction = $response->getTransactionReference();
 
         $this->logs()->create([
             'payload' => [
@@ -406,7 +406,7 @@ class Transaction extends Model
         Omnipay::setDefaultMerchant($this->merchant_id);
         $response = Omnipay::acceptNotification()->send();
 
-        $this->transaction = $response->getTransactionId();
+        $this->transaction = $response->getTransactionReference();
 
         $this->logs()->create([
             'payload' => [
@@ -443,8 +443,8 @@ class Transaction extends Model
         return array_merge([
             'returnUrl'            => route('omnipay.complete.' . $type, [$this->id]),
             'notifyUrl'            => route('omnipay.notify', [$this->id]),
-            'transactionReference' => $prefixedTransactionId,
-            'transactionId'        => $this->transaction ?? null,
+            'transactionId'        => $prefixedTransactionId,
+            'transactionReference' => $this->transaction ?? null,
             'amount'               => $this->amount,
         ], ($this->config ?? []));
     }
