@@ -13,7 +13,7 @@ class CreateTransactionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('omnipay_transactions', function (Blueprint $table) {
             $table->increments('id');
             $table->string('merchant_id');
             $table->decimal('amount');
@@ -24,7 +24,7 @@ class CreateTransactionsTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('transaction_logs', function (Blueprint $table) {
+        Schema::create('omnipay_transaction_logs', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('transaction_id');
             $table->foreign('transaction_id')->references('id')->on('transactions')->onDelete('cascade');
@@ -32,7 +32,7 @@ class CreateTransactionsTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('merchants', function (Blueprint $table) {
+        Schema::create('omnipay_merchants', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->string('gateway');
