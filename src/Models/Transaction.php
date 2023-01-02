@@ -113,11 +113,15 @@ class Transaction extends Model
 
         if ($response->isSuccessful()) {
             return true;
-        } elseif ($response->isRedirect()) {
+        } 
+        if ($response->isRedirect()) {
             return $response->getRedirectResponse();
-        } else {
-            throw new \RuntimeException('Purchase request failed');
+        } 
+        if ($response->getTransactionReference()) {
+            return response()->json($response->getData());
         }
+        
+        throw new \RuntimeException('Purchase request failed');
     }
 
     /**
@@ -183,11 +187,15 @@ class Transaction extends Model
 
         if ($response->isSuccessful()) {
             return redirect($this->redirect_to);
-        } elseif ($response->isRedirect()) {
-            return $response->getRedirectResponse();
-        } else {
-            throw new \RuntimeException('Authorize request failed');
         }
+        if ($response->isRedirect()) {
+            return $response->getRedirectResponse();
+        }
+        if ($response->getTransactionReference()) {
+            return response()->json($response->getData());
+        }
+        
+        throw new \RuntimeException('Authorize request failed');
     }
 
     /**
