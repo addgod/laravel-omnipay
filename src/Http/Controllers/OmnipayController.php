@@ -329,11 +329,10 @@ class OmnipayController extends Controller
      * Receives data for a transaction, from the payment gateway.
      *
      * @param \Addgod\Omnipay\Models\Transaction $transaction
-     * @param \Illuminate\Http\Request           $request
      *
      * @return \Illuminate\Http\Response
      */
-    public function notify(Transaction $transaction = null, Request $request)
+    public function notify(Transaction $transaction = null)
     {
         Omnipay::setMerchant($transaction->merchant_id);
         $response = Omnipay::acceptNotification()->send();
@@ -361,5 +360,21 @@ class OmnipayController extends Controller
         $transaction->save();
 
         return response()->noContent();
+    }
+
+    /**
+     * Fetch a payment providors available payment methods.
+     *
+     * @param mixed $merchant
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function paymentMethods($merchant, Request $request)
+    {
+        Omnipay::setMerchant($merchant);
+        $response = Omnipay::paymentMethods()->send();
+
+        return response()->json($response->getPaymentMethods());
     }
 }

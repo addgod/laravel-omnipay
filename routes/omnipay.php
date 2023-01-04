@@ -11,6 +11,7 @@ Route::group([
     Route::any('/complete/purchase/{transaction}', 'OmnipayController@completePurchase')->name('omnipay.complete.purchase');
     Route::any('/complete/authorize/{transaction}', 'OmnipayController@completeAuthorize')->name('omnipay.complete.authorize');
     Route::any('/notify/{transaction}', 'OmnipayController@notify')->name('omnipay.notify');
+    Route::get('/payment-methods/{merchant}', 'OmnipayController@paymentMethods')->name('omnipay.payment-methods');
 });
 
 Route::group([
