@@ -3,7 +3,10 @@
 namespace Addgod\Omnipay\Http\Controllers;
 
 use Illuminate\Routing\Controller;
+use Illuminate\Http\Request;
 use Addgod\Omnipay\Models\Transaction;
+use Addgod\Omnipay\Facades\Omnipay;
+use Illuminate\Support\Facades\Auth;
 
 class OmnipayController extends Controller
 {
@@ -12,11 +15,35 @@ class OmnipayController extends Controller
      *
      * @param \Addgod\Omnipay\Models\Transaction $transaction
      *
-     * @return bool
+     * @return mixed
      */
     public function purchase(Transaction $transaction)
     {
-        return $transaction->purchase();
+        if ($transaction->status === Transaction::STATUS_PURCHASE) {
+            return redirect()->back();
+        }
+
+        if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_CREATED) {
+            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
+        }
+
+        Omnipay::setMerchant($transaction->merchant_id);
+        $response = Omnipay::purchase($transaction->getParameters('purchase'))->send();
+
+        $transaction->status = Transaction::STATUS_PURCHASE;
+        $transaction->save();
+
+        if ($response->isSuccessful()) {
+            return redirect($transaction->redirect_to);
+        } 
+        if ($response->isRedirect()) {
+            return $response->getRedirectResponse();
+        } 
+        if ($response->isTransparentRedirect()) {
+            return response()->json($response->getData());
+        }
+        
+        throw new \RuntimeException('Purchase request failed');
     }
 
     /**
@@ -24,11 +51,37 @@ class OmnipayController extends Controller
      *
      * @param \Addgod\Omnipay\Models\Transaction $transaction
      *
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|\Illuminate\Http\JsonResponse
      */
     public function completePurchase(Transaction $transaction)
     {
-        $transaction->completePurchase();
+        if ($transaction->status === Transaction::STATUS_PURCHASE_COMPLETE) {
+            return redirect()->back();
+        }
+
+        if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_PURCHASE) {
+            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_PURCHASE);
+        }
+
+        Omnipay::setMerchant($transaction->merchant_id);
+        $response = Omnipay::completePurchase()->send();
+
+        $transaction->transaction = $response->getTransactionReference();
+
+        $transaction->logs()->create([
+            'payload' => [
+                'action'  => 'Complete Purchase',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
+
+        if ($response->isSuccessful()) {
+            $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
+        } else {
+            $transaction->status = Transaction::STATUS_DECLINED;
+        }
+        $transaction->save();
 
         return redirect($transaction->redirect_to);
     }
@@ -38,11 +91,35 @@ class OmnipayController extends Controller
      *
      * @param \Addgod\Omnipay\Models\Transaction $transaction
      *
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|\Illuminate\Http\JsonResponse
      */
     public function authorize(Transaction $transaction)
     {
-        return $transaction->authorize();
+        if ($transaction->status === Transaction::STATUS_AUTHORIZE) {
+            return redirect()->back();
+        }
+
+        if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_CREATED) {
+            abort(400, 'Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
+        }
+
+        Omnipay::setMerchant($transaction->merchant_id);
+        $response = Omnipay::authorize($transaction->getParameters('authorize'))->send();
+
+        $transaction->status = Transaction::STATUS_AUTHORIZE;
+        $transaction->save();
+        
+        if ($response->isSuccessful()) {
+            return redirect($transaction->redirect_to);
+        }
+        if ($response->isRedirect()) {
+            return $response->getRedirectResponse();
+        }
+        if ($response->isTransparentRedirect()) {
+            return response()->json($response->getData());
+        }
+
+        abort(400, 'Authorize request failed');
     }
 
     /**
@@ -54,7 +131,34 @@ class OmnipayController extends Controller
      */
     public function completeAuthorize(Transaction $transaction)
     {
-        $transaction->completeAuthorize();
+        if ($transaction->status === Transaction::STATUS_AUTHORIZE_COMPLETE) {
+            return redirect()->back();
+        }
+
+        if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_AUTHORIZE) {
+            abort(400, 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE);
+        }
+
+        Omnipay::setMerchant($transaction->merchant_id);
+        $response = Omnipay::completeAuthorize()->send();
+
+        $transaction->transaction = $response->getTransactionReference();
+
+        $transaction->logs()->create([
+            'payload' => [
+                'action'  => 'Complete Authorization',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
+
+        if ($response->isSuccessful()) {
+            $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
+        } else {
+            $transaction->status = Transaction::STATUS_DECLINED;
+        }
+
+        $transaction->save();
 
         return redirect($transaction->redirect_to);
     }
@@ -66,7 +170,24 @@ class OmnipayController extends Controller
      */
     public function reAuthorize(Transaction $transaction)
     {
-        $transaction->reAuthorize();
+        if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
+            abort(400, 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
+        }
+
+        Omnipay::setMerchant($transaction->merchant_id);
+        $response = Omnipay::reAuthorize($transaction->getParameters())->send();
+
+        $transaction->logs()->create([
+            'payload' => [
+                'action'  => 'Re-Authorization',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
+
+        if (!$response->isSuccessful()) {
+            abort(400, 'Re-authorization failed');
+        }
     }
 
     /**
@@ -78,7 +199,32 @@ class OmnipayController extends Controller
      */
     public function capture(Transaction $transaction)
     {
-        $transaction->capture();
+        if ($transaction->status === Transaction::STATUS_CAPTURE) {
+            return redirect()->back();
+        }
+
+        if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
+            abort(400, 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
+        }
+
+        Omnipay::setMerchant($transaction->merchant_id);
+        $response = Omnipay::capture($transaction->getParameters())->send();
+
+        $transaction->logs()->create([
+            'payload' => [
+                'action'  => 'Capture',
+                'user'    => Auth::check() ? Auth::user()->toArray() : 'Automatic',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
+
+        if ($response->isSuccessful()) {
+            $transaction->status = Transaction::STATUS_CAPTURE;
+            $transaction->save();
+        } else {
+            abort(400, 'Capture of payment failed');
+        }
 
         return redirect()->back();
     }
@@ -92,7 +238,32 @@ class OmnipayController extends Controller
      */
     public function void(Transaction $transaction)
     {
-        $transaction->void();
+        if ($transaction->status === Transaction::STATUS_VOID) {
+            return redirect()->back();
+        }
+
+        if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
+            abort(400, 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
+        }
+
+        Omnipay::setMerchant($transaction->merchant_id);
+        $response = Omnipay::void($transaction->getParameters())->send();
+
+        $transaction->logs()->create([
+            'payload' => [
+                'action'  => 'Void',
+                'user'    => \Auth::check() ? \Auth::user()->toArray() : 'Automatic',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
+
+        if ($response->isSuccessful()) {
+            $transaction->status = Transaction::STATUS_VOID;
+            $transaction->save();
+        } else {
+            abort(400,'Void of payment failed');
+        }
 
         return redirect()->back();
     }
@@ -101,13 +272,55 @@ class OmnipayController extends Controller
      * Sends a refund request to the payment gateway.
      *
      * @param \Addgod\Omnipay\Models\Transaction $transaction
-     * @param null                                   $amount
+     * @param int|null                           $amount
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function refund(Transaction $transaction, $amount = null)
+    public function refund(Transaction $transaction, int $amount = null)
     {
-        $transaction->refund($amount);
+        if ($transaction->status === Transaction::STATUS_REFUND_FULLY) {
+            return redirect()->back();
+        }
+
+        $allowedStates = [
+            Transaction::STATUS_PURCHASE_COMPLETE,
+            Transaction::STATUS_CAPTURE,
+            Transaction::STATUS_REFUND_PARTIALLY,
+        ];
+        if (!$transaction->isUnguarded() && !\in_array($transaction->status, $allowedStates)) {
+            abort(400, 'Invalid state. Must have status of ' . implode(' or ', $allowedStates));
+        }
+
+        Omnipay::setMerchant($transaction->merchant_id);
+
+        $params = $transaction->getParameters();
+        if ($amount) {
+            $params['amount'] = $amount;
+        }
+
+        $response = Omnipay::refund($params)->send();
+
+        $transaction->logs()->create([
+            'payload' => [
+                'action'  => 'Refund',
+                'user'    => \Auth::user()->toArray(),
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
+
+        if ($response->isSuccessful()) {
+            if (!\is_null($amount) && $amount < $transaction->amount) {
+                $transaction->status = Transaction::STATUS_REFUND_PARTIALLY;
+                $transaction->amount = $transaction->amount - $amount;
+            } else {
+                $transaction->status = Transaction::STATUS_REFUND_FULLY;
+                $transaction->amount = 0;
+            }
+            $transaction->save();
+        } else {
+            abort(400, 'Refund of payment failed');
+        }
 
         return redirect()->back();
     }
@@ -116,13 +329,37 @@ class OmnipayController extends Controller
      * Receives data for a transaction, from the payment gateway.
      *
      * @param \Addgod\Omnipay\Models\Transaction $transaction
+     * @param \Illuminate\Http\Request           $request
      *
      * @return \Illuminate\Http\Response
      */
-    public function notify(Transaction $transaction)
+    public function notify(Transaction $transaction = null, Request $request)
     {
-        $transaction->notify();
+        Omnipay::setMerchant($transaction->merchant_id);
+        $response = Omnipay::acceptNotification()->send();
 
-        return response()->make(null, 200);
+        $transaction->transaction = $response->getTransactionReference();
+
+        $transaction->logs()->create([
+            'payload' => [
+                'action'  => 'Notify',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
+
+        if ($response->isSuccessful()) {
+            if ($transaction->status == Transaction::STATUS_PURCHASE) {
+                $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
+            } elseif ($transaction->status == Transaction::STATUS_AUTHORIZE) {
+                $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
+            }
+        } else {
+            $transaction->status = Transaction::STATUS_DECLINED;
+        }
+
+        $transaction->save();
+
+        return response()->noContent();
     }
 }

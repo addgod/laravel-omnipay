@@ -4,6 +4,7 @@ namespace Addgod\Omnipay;
 
 use Omnipay\Common\GatewayFactory;
 use Addgod\Omnipay\Models\Merchant;
+use Illuminate\Foundation\Application;
 
 class GatewayManager
 {
@@ -16,19 +17,37 @@ class GatewayManager
 
     /**
      * The registered merchants
+     * 
+     * @var array
      */
     protected $merchants;
 
     /**
+     * The chosen merchant
+     * 
+     * @var string
+     */
+    protected $merchant;
+
+    /**
      * The default settings, applied to every gateway
+     * 
+     * @var array
      */
     protected $defaults;
 
     /**
+     * The omnipay gateway facotry
+     *
+     * @var \Omnipay\Common\GatewayFactory
+     */
+    protected $factory;
+
+    /**
      * Create a new Gateway manager instance.
      *
-     * @param \Illuminate\Foundation\Application $app
-     * @param \Omnipay\Common\GatewayFactory     $factory
+     * @param                                $app
+     * @param \Omnipay\Common\GatewayFactory $factory
      * @param  array
      */
     public function __construct($app, GatewayFactory $factory, $defaults = [])
@@ -36,6 +55,12 @@ class GatewayManager
         $this->app = $app;
         $this->factory = $factory;
         $this->defaults = $defaults;
+        $this->merchant = $this->app['config']['omnipay.default_merchant'];
+        if ($this->app['config']['driver'] === 'array') {
+            $this->merchants = $this->app['config']['omnipay.merchants'];
+        } else {
+            $this->merchants = Merchant::all()->keyBy('id')->toArray();
+        }
     }
 
     /**
@@ -47,28 +72,21 @@ class GatewayManager
      */
     public function gateway()
     {
-        $merchant = $this->getDefaultMerchant();
-        if (!isset($this->merchants[$this->app['config']['omnipay.default_merchant']])) {
-            $gateway = $this->factory->create($merchant['gateway'], null, $this->app['request']);
-            $gateway->initialize(array_merge($this->defaults, $merchant['config']));
-            $this->merchants[$this->app['config']['omnipay.default_merchant']] = $gateway;
-        }
+        $merchant = $this->merchants[$this->merchant];
+        $gateway = $this->factory->create($merchant['gateway'], null, $this->app['request']);
+        $gateway->initialize(array_merge($this->defaults, $merchant['config']));
 
-        return $this->merchants[$this->app['config']['omnipay.default_merchant']];
+        return $gateway;
     }
 
     /**
-     * Get the default merchant.
+     * Get all registered merchants
      *
-     * @return mixed
+     * @return array
      */
-    public function getDefaultMerchant()
+    public function getMerchants()
     {
-        if ($this->app['config']['omnipay.driver'] === 'array') {
-            return $this->app['config']->get('omnipay.merchants.' . $this->app['config']['omnipay.default_merchant'], []);
-        } elseif ($this->app['config']['omnipay.driver'] === 'database') {
-            return Merchant::findOrFail($this->app['config']['omnipay.default_merchant'])->toArray();
-        }
+        return $this->merchants;
     }
 
     /**
@@ -78,13 +96,13 @@ class GatewayManager
      *
      * @return void
      */
-    public function setDefaultMerchant($identifier)
+    public function setMerchant($identifier)
     {
-        $this->app['config']['omnipay.default_merchant'] = $identifier;
+        $this->merchant = $identifier;
     }
 
     /**
-     * Dynamically call the default driver instance.
+     * Dynamically call the gateway.
      *
      * @param string $method
      * @param array  $parameters
