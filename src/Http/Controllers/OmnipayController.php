@@ -373,7 +373,7 @@ class OmnipayController extends Controller
     public function paymentMethods($merchant, Request $request)
     {
         Omnipay::setMerchant($merchant);
-        $response = Omnipay::paymentMethods()->send();
+        $response = Omnipay::paymentMethods()->send($request->all());
 
         return response()->json($response->getPaymentMethods());
     }
