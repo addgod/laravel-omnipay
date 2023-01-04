@@ -42,8 +42,5 @@
             "name": "Jesper Kold-Hansen",
             "email": "jkoldhansen@gmail.com"
         }
-    ],
-    "require-dev": {
-        "orchestra/testbench": "~5.0"
-    }
+    ]
 }
