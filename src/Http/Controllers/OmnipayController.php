@@ -20,11 +20,11 @@ class OmnipayController extends Controller
     public function purchase(Transaction $transaction)
     {
         if ($transaction->status === Transaction::STATUS_PURCHASE) {
-            return redirect()->back();
+            return redirect($transaction->redirect_to)->with('success', 'Already in status purchase');
         }
 
         if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_CREATED) {
-            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
+            return redirect($transaction->redirect_to)->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
@@ -43,7 +43,7 @@ class OmnipayController extends Controller
             return response()->json($response->getData());
         }
         
-        throw new \RuntimeException('Purchase request failed');
+        return redirect($transaction->redirect_to)->with('error', 'Purchase request failed');
     }
 
     /**
@@ -56,11 +56,11 @@ class OmnipayController extends Controller
     public function completePurchase(Transaction $transaction)
     {
         if ($transaction->status === Transaction::STATUS_PURCHASE_COMPLETE) {
-            return redirect()->back();
+            return redirect($transaction->redirect_to)->with('success', 'Already in status purchase complete');
         }
 
         if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_PURCHASE) {
-            throw new \RuntimeException('Invalid state. Must have status of ' . Transaction::STATUS_PURCHASE);
+            return redirect($transaction->redirect_to)->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_PURCHASE);
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
@@ -96,11 +96,11 @@ class OmnipayController extends Controller
     public function authorize(Transaction $transaction)
     {
         if ($transaction->status === Transaction::STATUS_AUTHORIZE) {
-            return redirect()->back();
+            return redirect($transaction->redirect_to)->with('success', 'Already in status authorize');
         }
 
         if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_CREATED) {
-            abort(400, 'Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
+            return redirect($transaction->redirect_to)->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_CREATED);
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
@@ -119,7 +119,7 @@ class OmnipayController extends Controller
             return response()->json($response->getData());
         }
 
-        abort(400, 'Authorize request failed');
+        return redirect($transaction->redirect_to)->with('error', 'Authorize request failed');
     }
 
     /**
@@ -132,11 +132,11 @@ class OmnipayController extends Controller
     public function completeAuthorize(Transaction $transaction)
     {
         if ($transaction->status === Transaction::STATUS_AUTHORIZE_COMPLETE) {
-            return redirect()->back();
+            return redirect($transaction->redirect_to)->with('success', 'Already in status authorize complete');
         }
 
         if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_AUTHORIZE) {
-            abort(400, 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE);
+            return redirect($transaction->redirect_to)->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE);
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
@@ -204,7 +204,7 @@ class OmnipayController extends Controller
         }
 
         if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
-            abort(400, 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
+            return redirect()->back()->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
@@ -223,7 +223,7 @@ class OmnipayController extends Controller
             $transaction->status = Transaction::STATUS_CAPTURE;
             $transaction->save();
         } else {
-            abort(400, 'Capture of payment failed');
+            redirect()->back()->with('error', 'Capture of payment failed');
         }
 
         return redirect()->back();
@@ -243,7 +243,7 @@ class OmnipayController extends Controller
         }
 
         if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_AUTHORIZE_COMPLETE) {
-            abort(400, 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
+            redirect()->back()->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE_COMPLETE);
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
@@ -262,7 +262,7 @@ class OmnipayController extends Controller
             $transaction->status = Transaction::STATUS_VOID;
             $transaction->save();
         } else {
-            abort(400,'Void of payment failed');
+            redirect()->back()->with('error', 'Void of payment failed');
         }
 
         return redirect()->back();
@@ -288,7 +288,7 @@ class OmnipayController extends Controller
             Transaction::STATUS_REFUND_PARTIALLY,
         ];
         if (!$transaction->isUnguarded() && !\in_array($transaction->status, $allowedStates)) {
-            abort(400, 'Invalid state. Must have status of ' . implode(' or ', $allowedStates));
+            return redirect()->back()->with('error', 'Invalid state. Must have status of ' . implode(' or ', $allowedStates));
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
@@ -319,7 +319,7 @@ class OmnipayController extends Controller
             }
             $transaction->save();
         } else {
-            abort(400, 'Refund of payment failed');
+            return redirect()->back()->with('error', 'Refund of payment failed');
         }
 
         return redirect()->back();
