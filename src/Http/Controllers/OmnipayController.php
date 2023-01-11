@@ -33,15 +33,21 @@ class OmnipayController extends Controller
         $transaction->status = Transaction::STATUS_PURCHASE;
         $transaction->save();
 
+        // We assume this means API driven
+        if ($response->isTransparentRedirect()) {
+            if ($response->isSuccessful()) {
+                $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
+                $transaction->save();
+            }
+
+            return response()->json($response->getData());
+        }
         if ($response->isSuccessful()) {
             return redirect($transaction->redirect_to);
         } 
         if ($response->isRedirect()) {
             return $response->getRedirectResponse();
         } 
-        if ($response->isTransparentRedirect()) {
-            return response()->json($response->getData());
-        }
         
         return redirect($transaction->redirect_to)->with('error', 'Purchase request failed');
     }
@@ -77,6 +83,15 @@ class OmnipayController extends Controller
         ]);
 
 
+        // We assume this means API driven
+        if ($response->isTransparentRedirect()) {
+            if ($response->isSuccessful()) {
+                $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
+                $transaction->save();
+            }
+            
+            return response()->json($response->getData());
+        }
         if ($response->isSuccessful()) {
             $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
             $transaction->save();
@@ -89,9 +104,6 @@ class OmnipayController extends Controller
         }
         if ($response->isRedirect()) {
             return $response->getRedirectResponse();
-        }
-        if ($response->isTransparentRedirect()) {
-            return response()->json($response->getData());
         }
 
         $transaction->status = Transaction::STATUS_DECLINED;
@@ -123,14 +135,20 @@ class OmnipayController extends Controller
         $transaction->status = Transaction::STATUS_AUTHORIZE;
         $transaction->save();
         
+        // We assume this means API driven
+        if ($response->isTransparentRedirect()) {
+            if ($response->isSuccessful()) {
+                $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
+                $transaction->save();
+            }
+
+            return response()->json($response->getData());
+        }
         if ($response->isSuccessful()) {
             return redirect($transaction->redirect_to);
         }
         if ($response->isRedirect()) {
             return $response->getRedirectResponse();
-        }
-        if ($response->isTransparentRedirect()) {
-            return response()->json($response->getData());
         }
 
         return redirect($transaction->redirect_to)->with('error', 'Authorize request failed');
@@ -166,6 +184,15 @@ class OmnipayController extends Controller
             ],
         ]);
 
+        // We assume this means API driven
+        if ($response->isTransparentRedirect()) {
+            if ($response->isSuccessful()) {
+                $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
+                $transaction->save();
+            }
+
+            return response()->json($response->getData());
+        }
         if ($response->isSuccessful()) {
             $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
             $transaction->save();
@@ -178,9 +205,6 @@ class OmnipayController extends Controller
         }
         if ($response->isRedirect()) {
             return $response->getRedirectResponse();
-        }
-        if ($response->isTransparentRedirect()) {
-            return response()->json($response->getData());
         }
 
         $transaction->status = Transaction::STATUS_DECLINED;
