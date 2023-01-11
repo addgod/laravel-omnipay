@@ -70,7 +70,7 @@ class OmnipayController extends Controller
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
-        $response = Omnipay::completePurchase()->send();
+        $response = Omnipay::completePurchase($transaction->getParameters('purchase'))->send();
 
         $transaction->transaction = $response->getTransactionReference();
 
@@ -172,7 +172,7 @@ class OmnipayController extends Controller
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
-        $response = Omnipay::completeAuthorize()->send();
+        $response = Omnipay::completeAuthorize($transaction->getParameters('authorize'))->send();
 
         $transaction->transaction = $response->getTransactionReference();
 
