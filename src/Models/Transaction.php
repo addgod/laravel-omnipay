@@ -102,6 +102,7 @@ class Transaction extends Model
         return array_merge([
             'returnUrl'            => route('omnipay.complete.' . $type, [$this->id]),
             'notifyUrl'            => route('omnipay.notify', [$this->id]),
+            'redirectUrl'          => $this->redirect_to,
             'transactionId'        => $prefixedTransactionId,
             'transactionReference' => $this->transaction ?? null,
             'amount'               => $this->amount,
