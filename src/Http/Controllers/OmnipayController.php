@@ -61,23 +61,12 @@ class OmnipayController extends Controller
      */
     public function completePurchase(Transaction $transaction)
     {
-        $data = http_build_query([
-            'transactionId'        => config('omnipay.transaction_route_prefix') . $transaction->id,
-            'transactionReference' => $transaction->transaction,
-        ]);
-        $redirect_to = $transaction->redirect_to;
-        if (str_contains($redirect_to, '?')) {
-            $redirect_to = sprintf('%s&%s', $redirect_to, $data);
-        } else {
-            $redirect_to = sprintf('%s?%s', $redirect_to, $data);
-        }
-
         if ($transaction->status === Transaction::STATUS_PURCHASE_COMPLETE) {
-            return redirect($redirect_to)->with('success', 'Already in status purchase complete');
+            return redirect($transaction->redirect_to)->with('success', 'Already in status purchase complete');
         }
 
         if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_PURCHASE) {
-            return redirect($redirect_to)->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_PURCHASE);
+            return redirect($transaction->redirect_to)->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_PURCHASE);
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
@@ -106,12 +95,12 @@ class OmnipayController extends Controller
         if ($response->isSuccessful()) {
             $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
             $transaction->save();
-            return redirect($redirect_to);
+            return redirect($transaction->redirect_to);
         }
         if ($response->isCancelled()) {
             $transaction->status = Transaction::STATUS_DECLINED;
             $transaction->save();
-            return redirect($redirect_to);
+            return redirect($transaction->redirect_to);
         }
         if ($response->isRedirect()) {
             return $response->getRedirectResponse();
@@ -120,7 +109,7 @@ class OmnipayController extends Controller
         $transaction->status = Transaction::STATUS_DECLINED;
         $transaction->save();
 
-        return redirect($redirect_to);
+        return redirect($transaction->redirect_to);
     }
 
     /**
@@ -174,23 +163,12 @@ class OmnipayController extends Controller
      */
     public function completeAuthorize(Transaction $transaction)
     {
-        $data = http_build_query([
-            'transactionId'        => config('omnipay.transaction_route_prefix') . $transaction->id,
-            'transactionReference' => $transaction->transaction,
-        ]);
-        $redirect_to = $transaction->redirect_to;
-        if (str_contains($redirect_to, '?')) {
-            $redirect_to = sprintf('%s&%s', $redirect_to, $data);
-        } else {
-            $redirect_to = sprintf('%s?%s', $redirect_to, $data);
-        }
-
         if ($transaction->status === Transaction::STATUS_AUTHORIZE_COMPLETE) {
-            return redirect($redirect_to)->with('success', 'Already in status authorize complete');
+            return redirect($transaction->redirect_to)->with('success', 'Already in status authorize complete');
         }
 
         if (!$transaction->isUnguarded() && $transaction->status !== Transaction::STATUS_AUTHORIZE) {
-            return redirect($redirect_to)->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE);
+            return redirect($transaction->redirect_to)->with('error', 'Invalid state. Must have status of ' . Transaction::STATUS_AUTHORIZE);
         }
 
         Omnipay::setMerchant($transaction->merchant_id);
@@ -218,12 +196,12 @@ class OmnipayController extends Controller
         if ($response->isSuccessful()) {
             $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
             $transaction->save();
-            return redirect($redirect_to);
+            return redirect($transaction->redirect_to);
         }
         if ($response->isCancelled()) {
             $transaction->status = Transaction::STATUS_DECLINED;
             $transaction->save();
-            return redirect($redirect_to);
+            return redirect($transaction->redirect_to);
         }
         if ($response->isRedirect()) {
             return $response->getRedirectResponse();
@@ -232,7 +210,7 @@ class OmnipayController extends Controller
         $transaction->status = Transaction::STATUS_DECLINED;
         $transaction->save();
 
-        return redirect($redirect_to);
+        return redirect($transaction->redirect_to);
     }
 
     /**
