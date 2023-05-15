@@ -38,6 +38,12 @@ class OmnipayController extends Controller
             if ($response->isSuccessful()) {
                 $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
                 $transaction->save();
+            } elseif ($response->isCancelled()) {
+                $transaction->status = Transaction::STATUS_VOID;
+                $transaction->save();
+            } else {
+                $transaction->status = Transaction::STATUS_DECLINED;
+                $transaction->save();
             }
 
             return response()->json($response->getData());
@@ -87,6 +93,12 @@ class OmnipayController extends Controller
         if ($response->isTransparentRedirect()) {
             if ($response->isSuccessful()) {
                 $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
+                $transaction->save();
+            } elseif ($response->isCancelled()) {
+                $transaction->status = Transaction::STATUS_VOID;
+                $transaction->save();
+            } else {
+                $transaction->status = Transaction::STATUS_DECLINED;
                 $transaction->save();
             }
             
@@ -140,6 +152,12 @@ class OmnipayController extends Controller
             if ($response->isSuccessful()) {
                 $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
                 $transaction->save();
+            } elseif ($response->isCancelled()) {
+                $transaction->status = Transaction::STATUS_VOID;
+                $transaction->save();
+            } else {
+                $transaction->status = Transaction::STATUS_DECLINED;
+                $transaction->save();
             }
 
             return response()->json($response->getData());
@@ -188,6 +206,12 @@ class OmnipayController extends Controller
         if ($response->isTransparentRedirect()) {
             if ($response->isSuccessful()) {
                 $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
+                $transaction->save();
+            } elseif ($response->isCancelled()) {
+                $transaction->status = Transaction::STATUS_VOID;
+                $transaction->save();
+            } else {
+                $transaction->status = Transaction::STATUS_DECLINED;
                 $transaction->save();
             }
 
@@ -403,8 +427,15 @@ class OmnipayController extends Controller
             } elseif ($transaction->status == Transaction::STATUS_AUTHORIZE) {
                 $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
             }
+        } elseif ($response->isCancelled()) {
+            $transaction->status = Transaction::STATUS_VOID;
+            $transaction->save();
+        } elseif ($response->isRefunded()) {
+            $transaction->status = Transaction::STATUS_REFUND_FULLY;
+            $transaction->save();
         } else {
             $transaction->status = Transaction::STATUS_DECLINED;
+            $transaction->save();
         }
 
         $transaction->save();
