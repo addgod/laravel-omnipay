@@ -33,16 +33,18 @@ class OmnipayController extends Controller
         $transaction->status = Transaction::STATUS_PURCHASE;
         $transaction->save();
 
+        $transaction->logs()->create([
+            'payload' => [
+                'action'  => 'Complete Authorization',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
+
         // We assume this means API driven
         if ($response->isTransparentRedirect()) {
             if ($response->isSuccessful()) {
                 $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
-                $transaction->save();
-            } elseif ($response->isCancelled()) {
-                $transaction->status = Transaction::STATUS_VOID;
-                $transaction->save();
-            } else {
-                $transaction->status = Transaction::STATUS_DECLINED;
                 $transaction->save();
             }
 
@@ -146,17 +148,19 @@ class OmnipayController extends Controller
 
         $transaction->status = Transaction::STATUS_AUTHORIZE;
         $transaction->save();
+
+        $transaction->logs()->create([
+            'payload' => [
+                'action'  => 'Complete Authorization',
+                'message' => $response->getMessage(),
+                'data'    => $response->getData(),
+            ],
+        ]);
         
         // We assume this means API driven
         if ($response->isTransparentRedirect()) {
             if ($response->isSuccessful()) {
                 $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
-                $transaction->save();
-            } elseif ($response->isCancelled()) {
-                $transaction->status = Transaction::STATUS_VOID;
-                $transaction->save();
-            } else {
-                $transaction->status = Transaction::STATUS_DECLINED;
                 $transaction->save();
             }
 
