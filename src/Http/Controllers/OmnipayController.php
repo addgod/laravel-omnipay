@@ -35,7 +35,7 @@ class OmnipayController extends Controller
 
         $transaction->logs()->create([
             'payload' => [
-                'action'  => 'Complete Authorization',
+                'action'  => 'Purchase',
                 'message' => $response->getMessage(),
                 'data'    => $response->getData(),
             ],
@@ -99,6 +99,9 @@ class OmnipayController extends Controller
             } elseif ($response->isCancelled()) {
                 $transaction->status = Transaction::STATUS_VOID;
                 $transaction->save();
+            } elseif ($response->isPending()) {
+                $transaction->status = Transaction::STATUS_PURCHASE;
+                $transaction->save();
             } else {
                 $transaction->status = Transaction::STATUS_DECLINED;
                 $transaction->save();
@@ -151,7 +154,7 @@ class OmnipayController extends Controller
 
         $transaction->logs()->create([
             'payload' => [
-                'action'  => 'Complete Authorization',
+                'action'  => 'Authorize',
                 'message' => $response->getMessage(),
                 'data'    => $response->getData(),
             ],
@@ -200,7 +203,7 @@ class OmnipayController extends Controller
 
         $transaction->logs()->create([
             'payload' => [
-                'action'  => 'Complete Authorization',
+                'action'  => 'Complete Authorize',
                 'message' => $response->getMessage(),
                 'data'    => $response->getData(),
             ],
@@ -213,6 +216,9 @@ class OmnipayController extends Controller
                 $transaction->save();
             } elseif ($response->isCancelled()) {
                 $transaction->status = Transaction::STATUS_VOID;
+                $transaction->save();
+            } elseif ($response->isPending()) {
+                $transaction->status = Transaction::STATUS_AUTHORIZE;
                 $transaction->save();
             } else {
                 $transaction->status = Transaction::STATUS_DECLINED;
