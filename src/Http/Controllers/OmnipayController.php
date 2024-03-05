@@ -44,6 +44,7 @@ class OmnipayController extends Controller
         // We assume this means API driven
         if ($response->isTransparentRedirect()) {
             if ($response->isSuccessful()) {
+                $transaction->transaction = $response->getTransactionReference();
                 $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
                 $transaction->save();
             }
@@ -163,6 +164,7 @@ class OmnipayController extends Controller
         // We assume this means API driven
         if ($response->isTransparentRedirect()) {
             if ($response->isSuccessful()) {
+                $transaction->transaction = $response->getTransactionReference();
                 $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
                 $transaction->save();
             }
@@ -304,6 +306,7 @@ class OmnipayController extends Controller
         ]);
 
         if ($response->isSuccessful()) {
+            $transaction->transaction = $response->getTransactionReference();
             $transaction->status = Transaction::STATUS_CAPTURE;
             $transaction->save();
         } else {
