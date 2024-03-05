@@ -52,7 +52,6 @@ class OmnipayController extends Controller
             return response()->json($response->getData());
         }
         if ($response->isSuccessful()) {
-            $transaction->transaction = $response->getTransactionReference();
             return redirect($transaction->redirect_to);
         } 
         if ($response->isRedirect()) {
@@ -173,7 +172,6 @@ class OmnipayController extends Controller
             return response()->json($response->getData());
         }
         if ($response->isSuccessful()) {
-            $transaction->transaction = $response->getTransactionReference();
             return redirect($transaction->redirect_to);
         }
         if ($response->isRedirect()) {
