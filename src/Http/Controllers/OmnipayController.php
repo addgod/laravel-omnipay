@@ -95,18 +95,15 @@ class OmnipayController extends Controller
         if ($response->isTransparentRedirect()) {
             if ($response->isSuccessful()) {
                 $transaction->status = Transaction::STATUS_PURCHASE_COMPLETE;
-                $transaction->save();
             } elseif ($response->isCancelled()) {
                 $transaction->status = Transaction::STATUS_VOID;
-                $transaction->save();
             } elseif ($response->isPending()) {
                 $transaction->status = Transaction::STATUS_PURCHASE;
-                $transaction->save();
             } else {
                 $transaction->status = Transaction::STATUS_DECLINED;
-                $transaction->save();
             }
-            
+            $transaction->save();
+
             return response()->json($response->getData());
         }
         if ($response->isSuccessful()) {
@@ -213,17 +210,15 @@ class OmnipayController extends Controller
         if ($response->isTransparentRedirect()) {
             if ($response->isSuccessful()) {
                 $transaction->status = Transaction::STATUS_AUTHORIZE_COMPLETE;
-                $transaction->save();
             } elseif ($response->isCancelled()) {
                 $transaction->status = Transaction::STATUS_VOID;
-                $transaction->save();
             } elseif ($response->isPending()) {
                 $transaction->status = Transaction::STATUS_AUTHORIZE;
-                $transaction->save();
             } else {
                 $transaction->status = Transaction::STATUS_DECLINED;
-                $transaction->save();
             }
+
+            $transaction->save();
 
             return response()->json($response->getData());
         }
@@ -439,13 +434,12 @@ class OmnipayController extends Controller
             }
         } elseif ($response->isCancelled()) {
             $transaction->status = Transaction::STATUS_VOID;
-            $transaction->save();
-        } elseif ($response->isRefunded()) {
+        } elseif (method_exists($response, 'isCaptured') && $response->isCaptured()) {
+            $transaction->status = Transaction::STATUS_CAPTURE;
+        } elseif (method_exists($response, 'isRefunded') && $response->isRefunded()) {
             $transaction->status = Transaction::STATUS_REFUND_FULLY;
-            $transaction->save();
         } else {
             $transaction->status = Transaction::STATUS_DECLINED;
-            $transaction->save();
         }
 
         $transaction->save();
