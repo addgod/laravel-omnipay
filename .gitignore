@@ -1,3 +1,4 @@
-/vendor/
-.idea
-.lando.yml
+/.idea
+/.lando.yml
+/composer.lock
+/vendor
