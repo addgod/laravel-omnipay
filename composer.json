@@ -13,7 +13,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "laravel/framework": "~5|~6|~7|~8|~9",
+        "laravel/framework": "~5|~6|~7|~8|~9|~10|~11|~12",
         "league/omnipay": "~3"
     },
     "autoload": {
@@ -42,5 +42,10 @@
             "name": "Jesper Kold-Hansen",
             "email": "jkoldhansen@gmail.com"
         }
-    ]
+    ],
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    }
 }
